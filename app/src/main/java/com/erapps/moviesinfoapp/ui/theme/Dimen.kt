@@ -18,21 +18,24 @@ data class Dimen(
     val extraLarge: Dp = 64.dp,
     val extraExtraLarge: Dp = 128.dp,
     //text size
-    val textSmall: Dp = 12.dp,
+    val textExtraSmall: Dp = 12.dp,
+    val textSmall: Dp = 16.dp,
     val textMedium: Dp = 20.dp,
     val textLarge: Dp = 28.dp,
     val textExtraLarge: Dp = 36.dp,
     //border and elevation
     val borderThing: Dp = 1.dp,
     val borderMedium: Dp = 4.dp,
-    val elevationDefault: Dp = 1.dp,
-    val elevationNormal: Dp = 4.dp,
+    val borderRounded: Dp = 10.dp,
+    val elevationDefault: Dp = 4.dp,
+    val elevationNormal: Dp = 10.dp,
     //rounder corner shapes
     val roundedMedium: Dp = 10.dp,
     //images
     val imageDefault: Dp = 24.dp,
     val imageSmall: Dp = 32.dp,
-    val imageLarge: Dp = 96.dp
+    val imageLarge: Dp = 96.dp,
+    val imageExtraLarge: Dp = 176.dp
 )
 
 val LocalDimen = compositionLocalOf { Dimen() }

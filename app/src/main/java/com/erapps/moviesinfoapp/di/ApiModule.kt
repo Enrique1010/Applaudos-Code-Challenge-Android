@@ -1,6 +1,7 @@
 package com.erapps.moviesinfoapp.di
 
 import com.erapps.moviesinfoapp.BuildConfig
+import com.erapps.moviesinfoapp.data.api.NetworkResponseAdapterFactory
 import com.erapps.moviesinfoapp.data.api.TheMovieDBApiService
 import com.google.gson.Gson
 import dagger.Module
@@ -55,7 +56,7 @@ object ApiModule {
     ): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.The_Movie_DB_Api_Base_URL)
-            //.addCallAdapterFactory(NetworkResponseAdapterFactory())
+            .addCallAdapterFactory(NetworkResponseAdapterFactory())
             .addConverterFactory(gsonConverterFactory)
             .client(okHttpClient)
             .build()

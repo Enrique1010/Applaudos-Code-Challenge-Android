@@ -17,7 +17,7 @@ sealed class NavItem(
     //navigation objects
     //splash to landing
     object Splash : NavItem("splash")
-    object Landing : NavItem("landing_page")
+    object Main : NavItem("main")
 
     //main navigation
     object Home : NavItem("home")

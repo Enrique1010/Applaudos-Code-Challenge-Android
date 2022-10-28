@@ -14,18 +14,22 @@ interface TheMovieDBApiService {
 
     @GET("tv/{filterBy}")
     suspend fun getTrendingTvShows(
+        @Path("filterBy") filterBy: String = FilterBySelection.Popular.filter,
         @Query("api_key") apiKey: String = BuildConfig.API_KEY,
-        @Path("filterBy") filterBy: String = FilterBySelection.Popular.filter
+        @Query("page") page: Int
+
     ): NetworkResponse<ListResponse, ErrorResponse>
 
     //tv show details api calls
     @GET("tv/{id}")
     suspend fun getTVShowById(
-        @Path("id") id: Int
+        @Path("id") id: Int,
+        @Query("api_key") apiKey: String = BuildConfig.API_KEY
     ): NetworkResponse<TvShowDetails, ErrorResponse>
 
     @GET("tv/{id}/season/{season}")
     suspend fun getTVShowSeason(
-        @Path("id") id: Int, @Path("season") season: Int
+        @Path("id") id: Int, @Path("season") season: Int,
+        @Query("api_key") apiKey: String = BuildConfig.API_KEY
     ): NetworkResponse<SeasonDetails, ErrorResponse>
 }

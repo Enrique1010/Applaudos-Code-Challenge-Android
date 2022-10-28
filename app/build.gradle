@@ -27,12 +27,14 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField 'String', 'The_Movie_DB_Api_Base_URL', '"https://api.themoviedb.org/3/"'
+            buildConfigField 'String', 'The_Movie_DB_Image_Base_URL', '"https://image.tmdb.org/t/p/w200"'
             buildConfigField 'String', 'API_KEY', '"21abcb8711234860660bb3fd5df08f1e"'
         }
         debug{
             versionNameSuffix '-debug'
             applicationIdSuffix '.debug'
             buildConfigField 'String', 'The_Movie_DB_Api_Base_URL', '"https://api.themoviedb.org/3/"'
+            buildConfigField 'String', 'The_Movie_DB_Image_Base_URL', '"https://image.tmdb.org/t/p/w200"'
             buildConfigField 'String', 'API_KEY', '"21abcb8711234860660bb3fd5df08f1e"'
         }
     }
@@ -59,9 +61,10 @@ android {
 ext{
     // AndroidX
     coreKtxVersion = '1.9.0'
-    lifecycleVersion = '2.5.1'
+    lifecycleVersion = '2.6.0-alpha03'
     activityCompose = '1.6.1'
     navigationCompose = '2.5.3'
+    pagingCompose = '1.0.0-alpha17'
     // Google
     materialVersion = '1.7.0'
     gsonVersion = '2.10'
@@ -89,9 +92,12 @@ dependencies {
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion"
     implementation "androidx.activity:activity-compose:$activityCompose"
     implementation "androidx.compose.material:material-icons-extended:$compose_version"
     implementation "androidx.navigation:navigation-compose:$navigationCompose"
+    implementation "androidx.paging:paging-compose:$pagingCompose"
     // Google
     implementation "com.google.android.material:material:$materialVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"

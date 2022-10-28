@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Movies Info App</string>
     <string name="app_title">Mubi</string>
+    <string name="try_again_btn_text">Try Again</string>
 </resources>

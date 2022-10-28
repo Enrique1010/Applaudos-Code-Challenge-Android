@@ -65,7 +65,7 @@ private fun Splash() {
             Spacer(modifier = Modifier.width(MaterialTheme.dimen.medium))
             Text(
                 modifier = Modifier.fillMaxWidth(.5f),
-                text = /*stringResource(id = R.string.app_title)*/"Mubi",
+                text = stringResource(id = R.string.app_title),
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
                 fontSize = MaterialTheme.dimen.textExtraLarge.convertDpToSp()

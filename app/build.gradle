@@ -68,6 +68,7 @@ ext{
     // Google
     materialVersion = '1.7.0'
     gsonVersion = '2.10'
+    pagerVersion = '0.27.0'
     //hilt
     hiltCompiler = '1.0.0'
     // SquareUp
@@ -99,6 +100,8 @@ dependencies {
     // Google
     implementation "com.google.android.material:material:$materialVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation "com.google.accompanist:accompanist-pager:$pagerVersion"
+    implementation "com.google.accompanist:accompanist-pager-indicators:$pagerVersion"
     //hilt
     implementation "com.google.dagger:hilt-android:$rootProject.hiltVersion"
     kapt "com.google.dagger:hilt-android-compiler:$rootProject.hiltVersion"

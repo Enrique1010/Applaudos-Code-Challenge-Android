@@ -13,7 +13,7 @@ interface TheMovieDBApiService {
 
     @GET("tv/{filterBy}")
     suspend fun getTrendingTvShows(
-        @Path("filterBy") filterBy: String = FilterBySelection.Popular.filter,
+        @Path("filterBy") filterBy: String,
         @Query("api_key") apiKey: String = BuildConfig.API_KEY,
         @Query("page") page: Int
 

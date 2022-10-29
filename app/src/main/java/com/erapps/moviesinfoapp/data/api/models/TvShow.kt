@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "fav_tvShow")
 data class TvShow(
-    val backdrop_path: String,
+    val backdrop_path: String? = null,
     val first_air_date: String,
     val genre_ids: List<Int>,
     @PrimaryKey(autoGenerate = false)

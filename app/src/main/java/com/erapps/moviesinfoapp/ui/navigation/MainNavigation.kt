@@ -11,8 +11,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.erapps.moviesinfoapp.ui.screens.details.DetailsScreen
-import com.erapps.moviesinfoapp.ui.screens.details.seasondetails.SeasonDetailsScreen
 import com.erapps.moviesinfoapp.ui.screens.home.HomeScreen
+import com.erapps.moviesinfoapp.ui.screens.favs.FavsScreen
 
 @Composable
 fun MainNavigation(
@@ -26,15 +26,18 @@ fun MainNavigation(
         startDestination = NavItem.Home.baseRoute
     ) {
         composable(NavItem.Home) {
-            HomeScreen {
-                navController.safeNavigate(NavItem.Details.createRoute(it))
+            HomeScreen(
+                onFavsClick = { navController.safeNavigate(NavItem.Favs.route) },
+                onCardClick = { navController.safeNavigate(NavItem.Details.createRoute(it)) }
+            )
+        }
+        composable(NavItem.Favs) {
+            FavsScreen {
+                navController.popBackStack()
             }
         }
         composable(NavItem.Details) {
             DetailsScreen()
-        }
-        composable(NavItem.SeasonDetails) {
-            SeasonDetailsScreen()
         }
     }
 }

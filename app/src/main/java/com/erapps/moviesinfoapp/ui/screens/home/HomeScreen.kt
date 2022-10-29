@@ -1,18 +1,23 @@
 package com.erapps.moviesinfoapp.ui.screens.home
 
 import android.widget.Toast
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarHalf
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,12 +38,15 @@ import coil.request.ImageRequest
 import com.erapps.moviesinfoapp.R
 import com.erapps.moviesinfoapp.data.api.models.FilterBySelection
 import com.erapps.moviesinfoapp.data.api.models.TvShow
+import com.erapps.moviesinfoapp.data.api.models.getAllFilters
+import com.erapps.moviesinfoapp.data.api.models.getFilter
 import com.erapps.moviesinfoapp.ui.shared.PageWithState
 import com.erapps.moviesinfoapp.ui.shared.UiState
 import com.erapps.moviesinfoapp.ui.shared.getNetworkStatus
 import com.erapps.moviesinfoapp.ui.theme.dimen
 import com.erapps.moviesinfoapp.utils.convertDpToSp
 import com.erapps.moviesinfoapp.utils.getImageByPath
+import com.google.accompanist.pager.*
 import java.math.RoundingMode
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -46,10 +54,10 @@ import kotlin.math.floor
 @Composable
 fun HomeScreen(
     viewModel: HomeScreenViewModel = hiltViewModel(),
+    onFavsClick: () -> Unit,
     onCardClick: (Int) -> Unit
 ) {
     val tvShows = viewModel.tvShows.collectAsLazyPagingItems()
-    val status = getNetworkStatus()
 
     val uiState = when {
         tvShows.loadState.source.refresh == LoadState.Loading -> {
@@ -57,9 +65,6 @@ fun HomeScreen(
         }
         tvShows.itemCount == 0 -> {
             UiState.Empty
-        }
-        !status -> {
-            UiState.Error(errorStringResource = R.string.error_no_internet)
         }
         else -> {
             UiState.Success(tvShows)
@@ -69,6 +74,7 @@ fun HomeScreen(
     HomeScreen(
         uiState = uiState,
         onEmptyButtonClick = { viewModel.getFilteredTvShows(FilterBySelection.Popular.filter) },
+        onFavsClick = onFavsClick,
         onCardClick = onCardClick
     ) { viewModel.getFilteredTvShows(it) }
 }
@@ -77,6 +83,7 @@ fun HomeScreen(
 fun HomeScreen(
     modifier: Modifier = Modifier,
     uiState: UiState?,
+    onFavsClick: () -> Unit,
     onEmptyButtonClick: () -> Unit,
     onCardClick: (Int) -> Unit,
     onFilterSelected: (String) -> Unit
@@ -84,52 +91,71 @@ fun HomeScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { AppBar() }
+        topBar = { AppBar(onFavsClick) }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
-            TabRowSection(paddingValues)
-            Column {
-                FilterChipGroup(onFilterSelected = onFilterSelected)
-                HomeScreenContent(
-                    uiState = uiState,
-                    onEmptyButtonClick = onEmptyButtonClick,
-                    onCardClick = onCardClick
-                )
+            ListAndFilter(onFilterSelected, uiState, onEmptyButtonClick, onCardClick)
+        }
+    }
+}
+
+@Composable
+private fun ListAndFilter(
+    onFilterSelected: (String) -> Unit,
+    uiState: UiState?,
+    onEmptyButtonClick: () -> Unit,
+    onCardClick: (Int) -> Unit
+) {
+    val selectedFilter = remember { mutableStateOf(getFilter("popular")) }
+
+    Column {
+        FilterChipGroup(
+            selectedFilter = selectedFilter,
+            onFilterSelected = onFilterSelected
+        )
+        HomeScreenContent(
+            uiState = uiState,
+            onEmptyButtonClick = onEmptyButtonClick,
+            onCardClick = onCardClick
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun FilterChipGroup(
+    modifier: Modifier = Modifier,
+    filters: List<FilterBySelection> = getAllFilters(),
+    selectedFilter: MutableState<FilterBySelection?>,
+    onFilterSelected: (String) -> Unit
+) {
+
+    Column(modifier = modifier.padding(MaterialTheme.dimen.small)) {
+        LazyRow {
+            items(filters) { filter ->
+                FilterChip(
+                    modifier = Modifier.padding(horizontal = MaterialTheme.dimen.extraSmall),
+                    selected = selectedFilter.value == filter,
+                    onClick = {
+                        selectedFilter.value = getFilter(filter.filter)
+                        onFilterSelected(filter.filter)
+                    },
+                    shape = CircleShape,
+                    selectedIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null
+                        )
+                    },
+                    colors = ChipDefaults.filterChipColors(
+                        selectedBackgroundColor = MaterialTheme.colors.primary,
+                        selectedContentColor = Color.White
+                    )
+                ) {
+                    Text(text = filter.filter.capitalize(Locale.current).replace("_", " "))
+                }
             }
         }
-    }
-}
-
-@Composable
-fun TabRowSection(paddingValues: PaddingValues) {
-
-    TabRow(
-        modifier = Modifier.padding(paddingValues),
-        selectedTabIndex = 0,
-        backgroundColor = MaterialTheme.colors.primary,
-    ) {
-        val tabs = listOf(
-            TabItem.Home,
-            TabItem.Favs
-        )
-
-        tabs.forEach { tabInfo ->
-            Tab(
-                selected = true,
-                text = { Text(text = tabInfo.title, color = Color.White) },
-                onClick = {  }
-            )
-        }
-    }
-}
-
-@Composable
-fun FilterChipGroup(onFilterSelected: (String) -> Unit) {
-
-
-
-    LazyRow {
-
     }
 }
 
@@ -146,7 +172,7 @@ fun HomeScreenContent(
         uiState = uiState,
         onClick = onEmptyButtonClick
     ) {
-        TvShowList(it, onCardClick = { id ->
+        TvShowList(it) { id ->
             //only can go to details if internet is available
             if (status) {
                 onCardClick(id)
@@ -157,7 +183,7 @@ fun HomeScreenContent(
                 context.getString(R.string.cant_see_details_without_internet_text),
                 Toast.LENGTH_LONG
             ).show()
-        })
+        }
     }
 }
 
@@ -190,10 +216,7 @@ fun TvShowListItem(
         modifier = modifier.padding(MaterialTheme.dimen.small),
         shape = RoundedCornerShape(MaterialTheme.dimen.borderRounded),
         elevation = MaterialTheme.dimen.elevationNormal,
-        onClick = {
-
-            onCardClick(tvShow.id)
-        }
+        onClick = { onCardClick(tvShow.id) }
     ) {
         Column {
             ImageSection(imageUrl = tvShow.poster_path)
@@ -221,7 +244,7 @@ fun RatingSection(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        RatingBar(rating = (tvShowRating / 2), starsColor = MaterialTheme.colors.primary)
+        RatingBar(rating = (tvShowRating / 2), starsColor = MaterialTheme.colors.secondary)
         Text(
             text = (tvShowRating / 2).toBigDecimal()
                 .setScale(1, RoundingMode.UP)
@@ -312,7 +335,7 @@ private fun ImageSection(
 }
 
 @Composable
-fun AppBar() {
+fun AppBar(onFavsClick: () -> Unit) {
     TopAppBar(
         title = {
             Text(
@@ -320,6 +343,15 @@ fun AppBar() {
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
+        },
+        actions = {
+            IconButton(onClick = onFavsClick) {
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    tint = Color.White,
+                    contentDescription = null
+                )
+            }
         },
         backgroundColor = MaterialTheme.colors.primary
     )

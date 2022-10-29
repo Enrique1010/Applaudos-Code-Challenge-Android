@@ -6,3 +6,17 @@ enum class FilterBySelection(val filter: String) {
     OnTV("on_the_air"),
     AiringToday("airing_today")
 }
+
+fun getAllFilters(): List<FilterBySelection> {
+    return listOf(
+        FilterBySelection.Popular,
+        FilterBySelection.TopRated,
+        FilterBySelection.OnTV,
+        FilterBySelection.AiringToday,
+    )
+}
+
+fun getFilter(value: String): FilterBySelection? {
+    val map = FilterBySelection.values().associateBy(FilterBySelection::filter)
+    return map[value]
+}

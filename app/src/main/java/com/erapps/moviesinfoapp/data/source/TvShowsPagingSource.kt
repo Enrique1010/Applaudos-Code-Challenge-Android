@@ -3,13 +3,12 @@ package com.erapps.moviesinfoapp.data.source
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.erapps.moviesinfoapp.data.Result
-import com.erapps.moviesinfoapp.data.api.models.FilterBySelection
 import com.erapps.moviesinfoapp.data.api.models.TvShow
 import com.erapps.moviesinfoapp.data.source.remote.TvShowsRemoteDataSource
 
 class TvShowsPagingSource(
     private val dataSource: TvShowsRemoteDataSource,
-    private val filter: String = FilterBySelection.Popular.filter
+    private val filter: String
 ) : PagingSource<Int, TvShow>() {
 
     companion object {

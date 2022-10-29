@@ -7,7 +7,6 @@ import androidx.paging.cachedIn
 import com.erapps.moviesinfoapp.data.api.models.FilterBySelection
 import com.erapps.moviesinfoapp.data.api.models.TvShow
 import com.erapps.moviesinfoapp.data.source.TvShowsRepository
-import com.erapps.moviesinfoapp.ui.shared.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -12,6 +12,8 @@ import javax.inject.Inject
 
 interface TvShowsRepository {
     fun getFilteredTvShows(filter: String): Flow<PagingData<TvShow>>
+
+    //local data management
 }
 
 class TvShowsRepositoryImp @Inject constructor(
@@ -23,7 +25,7 @@ class TvShowsRepositoryImp @Inject constructor(
             pageSize = 30,
             enablePlaceholders = false
         ),
-        pagingSourceFactory = { TvShowsPagingSource(tvShowsRemoteDataSource) }
+        pagingSourceFactory = { TvShowsPagingSource(tvShowsRemoteDataSource, filter) }
     ).flow.flowOn(Dispatchers.Default)
 
 }

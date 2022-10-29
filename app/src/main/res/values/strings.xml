@@ -7,4 +7,5 @@
     <string name="cant_see_details_without_internet_text">To see details, please check your internet connection and try again.</string>
     <string name="no_results">No Results, please try again.</string>
     <string name="tv_shows_title">Tv Shows</string>
+    <string name="favs_tv_shows">Favorite Tv Shows</string>
 </resources>

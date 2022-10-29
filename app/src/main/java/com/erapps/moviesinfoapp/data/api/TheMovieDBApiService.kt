@@ -4,7 +4,6 @@ import com.erapps.moviesinfoapp.BuildConfig
 import com.erapps.moviesinfoapp.data.api.models.ErrorResponse
 import com.erapps.moviesinfoapp.data.api.models.FilterBySelection
 import com.erapps.moviesinfoapp.data.api.models.ListResponse
-import com.erapps.moviesinfoapp.data.api.models.seasondetails.SeasonDetails
 import com.erapps.moviesinfoapp.data.api.models.tvshowdetails.TvShowDetails
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -26,10 +25,4 @@ interface TheMovieDBApiService {
         @Path("id") id: Int,
         @Query("api_key") apiKey: String = BuildConfig.API_KEY
     ): NetworkResponse<TvShowDetails, ErrorResponse>
-
-    @GET("tv/{id}/season/{season}")
-    suspend fun getTVShowSeason(
-        @Path("id") id: Int, @Path("season") season: Int,
-        @Query("api_key") apiKey: String = BuildConfig.API_KEY
-    ): NetworkResponse<SeasonDetails, ErrorResponse>
 }

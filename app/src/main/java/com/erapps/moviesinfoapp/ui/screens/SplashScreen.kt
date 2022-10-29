@@ -29,11 +29,11 @@ fun SplashScreen(moveOn: () -> Unit) {
         moveOn()
     }
 
-    Splash()
+    SplashScreen()
 }
 
 @Composable
-private fun Splash() {
+private fun SplashScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -77,5 +77,5 @@ private fun Splash() {
 @Composable
 @Preview(showSystemUi = true, showBackground = true)
 fun SlashScreenPreview() {
-    Splash()
+    SplashScreen()
 }

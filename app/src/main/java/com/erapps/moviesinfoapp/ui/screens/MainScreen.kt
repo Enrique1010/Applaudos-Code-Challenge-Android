@@ -1,17 +1,53 @@
 package com.erapps.moviesinfoapp.ui.screens
 
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
+import com.erapps.moviesinfoapp.R
 import com.erapps.moviesinfoapp.ui.navigation.MainNavigation
+import com.erapps.moviesinfoapp.ui.shared.AnimatedSnackBar
+import com.erapps.moviesinfoapp.ui.shared.getNetworkStatus
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun MainScreen() {
+    val snackbarHostState = SnackbarHostState()
 
-    Scaffold {
+    Scaffold(
+        scaffoldState = rememberScaffoldState(snackbarHostState = snackbarHostState),
+        snackbarHost = { ShowNetworkStatusSnackBar(snackbarHostState = it) }
+    ) {
         MainNavigation(it)
+    }
+}
+
+@ExperimentalCoroutinesApi
+@Composable
+fun ShowNetworkStatusSnackBar(snackbarHostState: SnackbarHostState) {
+
+    if (getNetworkStatus()) {
+        snackbarHostState.currentSnackbarData?.dismiss()
+
+    } else {
+        val message = stringResource(id = R.string.error_no_internet)
+        LaunchedEffect(true) {
+            snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = "",
+                duration = SnackbarDuration.Indefinite
+            )
+        }
+
+        AnimatedSnackBar(
+            isConnected = true,
+            snackbarHostState = snackbarHostState
+        )
     }
 }
 

@@ -26,7 +26,9 @@ fun MainNavigation(
         startDestination = NavItem.Home.baseRoute
     ) {
         composable(NavItem.Home) {
-            HomeScreen()
+            HomeScreen {
+                navController.safeNavigate(NavItem.Details.createRoute(it))
+            }
         }
         composable(NavItem.Details) {
             DetailsScreen()

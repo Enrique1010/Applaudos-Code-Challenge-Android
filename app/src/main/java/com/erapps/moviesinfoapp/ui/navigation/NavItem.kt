@@ -21,6 +21,7 @@ sealed class NavItem(
 
     //main navigation
     object Home : NavItem("home")
+    object Favs : NavItem("favs")
     object Details : NavItem("details", listOf(NavArgs.DetailsId)) {
         fun createRoute(id: Int) = "$baseRoute/$id"
     }

@@ -69,7 +69,7 @@ fun <T> DetailsPageWithState(
 fun <T> PageWithState(
     uiState: UiState?,
     modifier: Modifier = Modifier,
-    emptyText: Int? = null,
+    onClick: () -> Unit,
     successBlock: @Composable (T) -> Unit
 ) {
     Box(
@@ -80,9 +80,7 @@ fun <T> PageWithState(
                 LoadingScreen(modifier = Modifier.background(MaterialTheme.colors.surface))
             }
             is UiState.Empty -> {
-                emptyText?.let {
-                    ScreenWithMessage(message = emptyText)
-                }
+                ScreenWithMessage(message = R.string.no_results, onClick = onClick)
             }
             is UiState.Error -> {
                 ErrorScreen(

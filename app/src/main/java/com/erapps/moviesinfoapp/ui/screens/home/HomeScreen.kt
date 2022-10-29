@@ -1,7 +1,11 @@
 package com.erapps.moviesinfoapp.ui.screens.home
 
+import android.widget.Toast
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -20,58 +24,147 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.erapps.moviesinfoapp.R
+import com.erapps.moviesinfoapp.data.api.models.FilterBySelection
 import com.erapps.moviesinfoapp.data.api.models.TvShow
 import com.erapps.moviesinfoapp.ui.shared.PageWithState
 import com.erapps.moviesinfoapp.ui.shared.UiState
+import com.erapps.moviesinfoapp.ui.shared.getNetworkStatus
 import com.erapps.moviesinfoapp.ui.theme.dimen
 import com.erapps.moviesinfoapp.utils.convertDpToSp
 import com.erapps.moviesinfoapp.utils.getImageByPath
+import java.math.RoundingMode
 import kotlin.math.ceil
 import kotlin.math.floor
 
-
 @Composable
 fun HomeScreen(
-    viewModel: HomeScreenViewModel = hiltViewModel()
+    viewModel: HomeScreenViewModel = hiltViewModel(),
+    onCardClick: (Int) -> Unit
 ) {
     val tvShows = viewModel.tvShows.collectAsLazyPagingItems()
-    val uiState: UiState = if (tvShows.itemCount == 0) {
-        UiState.Empty
-    } else {
-        UiState.Success(tvShows)
+    val status = getNetworkStatus()
+
+    val uiState = when {
+        tvShows.loadState.source.refresh == LoadState.Loading -> {
+            UiState.Loading
+        }
+        tvShows.itemCount == 0 -> {
+            UiState.Empty
+        }
+        !status -> {
+            UiState.Error(errorStringResource = R.string.error_no_internet)
+        }
+        else -> {
+            UiState.Success(tvShows)
+        }
     }
 
-    HomeScreen(uiState = uiState)
+    HomeScreen(
+        uiState = uiState,
+        onEmptyButtonClick = { viewModel.getFilteredTvShows(FilterBySelection.Popular.filter) },
+        onCardClick = onCardClick
+    ) { viewModel.getFilteredTvShows(it) }
 }
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    uiState: UiState?
+    uiState: UiState?,
+    onEmptyButtonClick: () -> Unit,
+    onCardClick: (Int) -> Unit,
+    onFilterSelected: (String) -> Unit
 ) {
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         topBar = { AppBar() }
     ) { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues)) {
+            TabRowSection(paddingValues)
+            Column {
+                FilterChipGroup(onFilterSelected = onFilterSelected)
+                HomeScreenContent(
+                    uiState = uiState,
+                    onEmptyButtonClick = onEmptyButtonClick,
+                    onCardClick = onCardClick
+                )
+            }
+        }
+    }
+}
 
-        PageWithState<LazyPagingItems<TvShow>>(
-            uiState = uiState,
-            modifier = Modifier.padding(paddingValues)
-        ) { TvShowList(it) }
+@Composable
+fun TabRowSection(paddingValues: PaddingValues) {
+
+    TabRow(
+        modifier = Modifier.padding(paddingValues),
+        selectedTabIndex = 0,
+        backgroundColor = MaterialTheme.colors.primary,
+    ) {
+        val tabs = listOf(
+            TabItem.Home,
+            TabItem.Favs
+        )
+
+        tabs.forEach { tabInfo ->
+            Tab(
+                selected = true,
+                text = { Text(text = tabInfo.title, color = Color.White) },
+                onClick = {  }
+            )
+        }
+    }
+}
+
+@Composable
+fun FilterChipGroup(onFilterSelected: (String) -> Unit) {
+
+
+
+    LazyRow {
+
+    }
+}
+
+@Composable
+fun HomeScreenContent(
+    uiState: UiState?,
+    onEmptyButtonClick: () -> Unit,
+    onCardClick: (Int) -> Unit
+) {
+    val context = LocalContext.current
+    val status = getNetworkStatus()
+
+    PageWithState<LazyPagingItems<TvShow>>(
+        uiState = uiState,
+        onClick = onEmptyButtonClick
+    ) {
+        TvShowList(it, onCardClick = { id ->
+            //only can go to details if internet is available
+            if (status) {
+                onCardClick(id)
+                return@TvShowList
+            }
+            Toast.makeText(
+                context,
+                context.getString(R.string.cant_see_details_without_internet_text),
+                Toast.LENGTH_LONG
+            ).show()
+        })
     }
 }
 
 @Composable
 fun TvShowList(
-    tvShows: LazyPagingItems<TvShow>
+    tvShows: LazyPagingItems<TvShow>,
+    onCardClick: (Int) -> Unit
 ) {
 
     LazyVerticalGrid(
@@ -80,7 +173,7 @@ fun TvShowList(
         horizontalArrangement = Arrangement.Center
     ) {
         items(tvShows.itemCount) { i ->
-            TvShowListItem(tvShow = tvShows[i]!!)
+            TvShowListItem(tvShow = tvShows[i]!!, onCardClick = onCardClick)
         }
     }
 }
@@ -89,14 +182,18 @@ fun TvShowList(
 @Composable
 fun TvShowListItem(
     modifier: Modifier = Modifier,
-    tvShow: TvShow
+    tvShow: TvShow,
+    onCardClick: (Int) -> Unit
 ) {
 
     Card(
         modifier = modifier.padding(MaterialTheme.dimen.small),
         shape = RoundedCornerShape(MaterialTheme.dimen.borderRounded),
         elevation = MaterialTheme.dimen.elevationNormal,
-        onClick = {}
+        onClick = {
+
+            onCardClick(tvShow.id)
+        }
     ) {
         Column {
             ImageSection(imageUrl = tvShow.poster_path)
@@ -125,7 +222,12 @@ fun RatingSection(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         RatingBar(rating = (tvShowRating / 2), starsColor = MaterialTheme.colors.primary)
-        Text(text = (tvShowRating / 2).toString())
+        Text(
+            text = (tvShowRating / 2).toBigDecimal()
+                .setScale(1, RoundingMode.UP)
+                .toDouble()
+                .toString()
+        )
     }
 }
 
@@ -214,23 +316,11 @@ fun AppBar() {
     TopAppBar(
         title = {
             Text(
-                text = stringResource(id = R.string.app_title),
+                text = stringResource(id = R.string.tv_shows_title),
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
         },
         backgroundColor = MaterialTheme.colors.primary
     )
-}
-
-@Composable
-@Preview(showSystemUi = true, showBackground = true)
-fun HomeScreenPreview() {
-    HomeScreen()
-}
-
-@Composable
-@Preview(showSystemUi = true, showBackground = true)
-fun TvShowListItemPreview() {
-    //TvShowListItem()
 }

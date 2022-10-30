@@ -1,5 +1,7 @@
 package com.erapps.moviesinfoapp.ui.screens.details
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -30,6 +33,7 @@ import coil.request.ImageRequest
 import com.erapps.moviesinfoapp.R
 import com.erapps.moviesinfoapp.data.api.models.tvshowdetails.ShortSeason
 import com.erapps.moviesinfoapp.data.api.models.tvshowdetails.TvShowDetails
+import com.erapps.moviesinfoapp.data.room.entities.FavoriteTvShow
 import com.erapps.moviesinfoapp.ui.shared.BackButtonBar
 import com.erapps.moviesinfoapp.ui.shared.DetailsPageWithState
 import com.erapps.moviesinfoapp.ui.shared.RatingBar
@@ -45,14 +49,51 @@ fun DetailsScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isInFavorites by viewModel.isInFavorites.collectAsStateWithLifecycle()
 
-    DetailsScreen(uiState = uiState, onBackPressed = onBackPressed)
+    DetailsScreen(
+        uiState = uiState,
+        isInFavorites = isInFavorites,
+        onBackPressed = onBackPressed,
+        onFavButtonClick = { tvShowDetails ->
+            insertToFavsEvent(viewModel, tvShowDetails, isInFavorites)
+        }
+    )
+}
+
+
+private fun insertToFavsEvent(
+    viewModel: DetailsScreenViewModel,
+    tvShowDetails: TvShowDetails,
+    isInFavorites: Boolean
+) {
+    viewModel.tvShowIsInFavorites(tvShowDetails.id)
+
+    when (isInFavorites) {
+        true -> {
+            viewModel.deleteFavoriteTvShow(tvShowDetails.id)
+        }
+        false -> {
+            viewModel.insertFavoriteTvShow(
+                FavoriteTvShow(
+                    id = tvShowDetails.id,
+                    name = tvShowDetails.name,
+                    first_air_date = tvShowDetails.first_air_date,
+                    overview = tvShowDetails.overview,
+                    vote_average = tvShowDetails.vote_average,
+                    poster_path = tvShowDetails.poster_path
+                )
+            )
+        }
+    }
 }
 
 @Composable
 fun DetailsScreen(
     modifier: Modifier = Modifier,
     uiState: UiState?,
+    isInFavorites: Boolean,
+    onFavButtonClick: (TvShowDetails) -> Unit,
     onBackPressed: () -> Unit
 ) {
     val lazyListState = rememberLazyListState()
@@ -95,7 +136,11 @@ fun DetailsScreen(
                     )
                 }
                 item {
-                    SummarySection(overView = tvShowDetails.overview)
+                    SummarySection(
+                        tvShowDetails = tvShowDetails,
+                        isInFavorites = isInFavorites,
+                        onFavButtonClick = onFavButtonClick
+                    )
                 }
                 item {
                     SeasonsSection(seasons = tvShowDetails.seasons)
@@ -188,15 +233,20 @@ fun HeaderSection(
 
 @Composable
 fun SummarySection(
-    overView: String
+    tvShowDetails: TvShowDetails,
+    isInFavorites: Boolean,
+    onFavButtonClick: (TvShowDetails) -> Unit
 ) {
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier.padding(MaterialTheme.dimen.medium),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
-        if (overView.isNotEmpty()) {
+
+        if (tvShowDetails.overview.isNotEmpty()) {
+
             Spacer(modifier = Modifier.height(MaterialTheme.dimen.small))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -208,20 +258,46 @@ fun SummarySection(
                     color = MaterialTheme.colors.primary,
                     fontSize = MaterialTheme.typography.h6.fontSize
                 )
-                IconButton(
-                    onClick = { },
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.FavoriteBorder,
-                        tint = MaterialTheme.colors.primary,
-                        contentDescription = null
-                    )
-                }
+                FavoritesButton(onFavButtonClick, tvShowDetails, isInFavorites, context)
             }
             Spacer(modifier = Modifier.height(MaterialTheme.dimen.small))
-            Text(text = overView, fontSize = MaterialTheme.typography.body1.fontSize)
+            Text(text = tvShowDetails.overview, fontSize = MaterialTheme.typography.body1.fontSize)
             Spacer(modifier = Modifier.height(MaterialTheme.dimen.medium))
+        } else {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
+            ) {
+                FavoritesButton(onFavButtonClick, tvShowDetails, isInFavorites, context)
+            }
         }
+    }
+}
+
+@Composable
+private fun FavoritesButton(
+    onFavButtonClick: (TvShowDetails) -> Unit,
+    tvShowDetails: TvShowDetails,
+    isInFavorites: Boolean,
+    context: Context
+) {
+    val addedTo = stringResource(id = R.string.added_to)
+    val removeFrom = stringResource(id = R.string.remove_from)
+
+    IconButton(
+        onClick = {
+            onFavButtonClick(tvShowDetails)
+            val text = if (!isInFavorites) addedTo else removeFrom
+            Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+        },
+    ) {
+        Icon(
+            imageVector = if (!isInFavorites) Icons.Outlined.FavoriteBorder else Icons.Default.Favorite,
+            tint = MaterialTheme.colors.primary,
+            contentDescription = null
+        )
     }
 }
 
@@ -279,7 +355,7 @@ private fun ContentSection(
             modifier = modifier.fillMaxWidth(),
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colors.primary,
-            text = "${season.episode_count} Episodes"
+            text = "${season.episode_count} ${stringResource(id = R.string.episodes)}"
         )
         Text(
             modifier = modifier.fillMaxWidth(),

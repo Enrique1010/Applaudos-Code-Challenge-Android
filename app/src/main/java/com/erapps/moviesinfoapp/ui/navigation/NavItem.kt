@@ -2,6 +2,12 @@ package com.erapps.moviesinfoapp.ui.navigation
 
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.erapps.moviesinfoapp.utils.Constants.DETAILS_SCREEN
+import com.erapps.moviesinfoapp.utils.Constants.HOME_SCREEN
+import com.erapps.moviesinfoapp.utils.Constants.MAIN_SCREEN
+import com.erapps.moviesinfoapp.utils.Constants.PROFILE_SCREEN
+import com.erapps.moviesinfoapp.utils.Constants.SPLASH_SCREEN
+import com.erapps.moviesinfoapp.utils.Constants.TV_SHOW_ID_ARGUMENT
 
 sealed class NavItem(
     val baseRoute: String,
@@ -16,13 +22,13 @@ sealed class NavItem(
 
     //navigation objects
     //splash to landing
-    object Splash : NavItem("splash")
-    object Main : NavItem("main")
+    object Splash : NavItem(SPLASH_SCREEN)
+    object Main : NavItem(MAIN_SCREEN)
 
     //main navigation
-    object Home : NavItem("home")
-    object Profile : NavItem("profile")
-    object Details : NavItem("details", listOf(NavArgs.DetailsId)) {
+    object Home : NavItem(HOME_SCREEN)
+    object Profile : NavItem(PROFILE_SCREEN)
+    object Details : NavItem(DETAILS_SCREEN, listOf(NavArgs.DetailsId)) {
         fun createRoute(id: Int) = "$baseRoute/$id"
     }
 }
@@ -31,5 +37,5 @@ enum class NavArgs(
     val key: String,
     val navType: NavType<*>
 ) {
-    DetailsId("detailsId", NavType.IntType)
+    DetailsId(TV_SHOW_ID_ARGUMENT, NavType.IntType)
 }

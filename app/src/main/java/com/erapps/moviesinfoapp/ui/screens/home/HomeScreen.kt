@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -109,13 +110,9 @@ private fun ListAndFilter(
     onCardClick: (Int) -> Unit,
     onCache: (List<TvShow>) -> Unit
 ) {
-    val selectedFilter = remember { mutableStateOf(getFilter("popular")) }
 
     Column {
-        FilterChipGroup(
-            selectedFilter = selectedFilter,
-            onFilterSelected = onFilterSelected
-        )
+        FilterChipGroup(onFilterSelected = onFilterSelected)
         HomeScreenContent(
             uiState = uiState,
             onEmptyButtonClick = onEmptyButtonClick,
@@ -130,9 +127,10 @@ private fun ListAndFilter(
 private fun FilterChipGroup(
     modifier: Modifier = Modifier,
     filters: List<FilterBySelection> = getAllFilters(),
-    selectedFilter: MutableState<FilterBySelection?>,
     onFilterSelected: (String) -> Unit
 ) {
+
+    val selectedFilter = rememberSaveable { mutableStateOf(getFilter("popular")) }
 
     Column(modifier = modifier.padding(MaterialTheme.dimen.small)) {
         LazyRow {

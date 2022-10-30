@@ -10,4 +10,7 @@
     <string name="profile">Profile</string>
     <string name="no_info_about_tv_show">Error!, no Information related to the Tv show.</string>
     <string name="summary">Summary</string>
+    <string name="added_to">Added to Favorites!</string>
+    <string name="remove_from">Remove from Favorites!</string>
+    <string name="episodes">Episodes</string>
 </resources>

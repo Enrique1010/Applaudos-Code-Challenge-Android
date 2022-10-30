@@ -239,7 +239,7 @@ private fun TvShowListItem(
 }
 
 @Composable
-private fun RatingSection(
+fun RatingSection(
     modifier: Modifier = Modifier,
     tvShowRating: Double
 ) {
@@ -260,7 +260,7 @@ private fun RatingSection(
 }
 
 @Composable
-private fun TitleSection(
+fun TitleSection(
     modifier: Modifier = Modifier,
     tvShowName: String
 ) {
@@ -278,7 +278,7 @@ private fun TitleSection(
 }
 
 @Composable
-private fun ImageSection(
+fun ImageSection(
     modifier: Modifier = Modifier,
     imageUrl: String
 ) {
@@ -310,8 +310,12 @@ private fun AppBar(onFavsClick: () -> Unit) {
             )
         },
         actions = {
-            IconButton(onClick = onFavsClick) {
+            IconButton(
+                modifier = Modifier.size(MaterialTheme.dimen.extraLarge),
+                onClick = onFavsClick
+            ) {
                 Icon(
+                    modifier = Modifier.size(MaterialTheme.dimen.large),
                     imageVector = Icons.Default.AccountCircle,
                     tint = Color.White,
                     contentDescription = null

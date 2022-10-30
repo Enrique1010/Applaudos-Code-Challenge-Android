@@ -17,6 +17,7 @@ data class Dimen(
     val large: Dp = 32.dp,
     val extraLarge: Dp = 64.dp,
     val extraExtraLarge: Dp = 128.dp,
+    val mediumButtonSize: Dp = 48.dp,
     //border and elevation
     val borderThing: Dp = 1.dp,
     val borderMedium: Dp = 4.dp,

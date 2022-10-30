@@ -9,11 +9,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material.icons.outlined.StarHalf
-import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -41,15 +38,13 @@ import com.erapps.moviesinfoapp.data.api.models.TvShow
 import com.erapps.moviesinfoapp.data.api.models.getAllFilters
 import com.erapps.moviesinfoapp.data.api.models.getFilter
 import com.erapps.moviesinfoapp.ui.shared.PageWithState
+import com.erapps.moviesinfoapp.ui.shared.RatingBar
 import com.erapps.moviesinfoapp.ui.shared.UiState
 import com.erapps.moviesinfoapp.ui.shared.getNetworkStatus
 import com.erapps.moviesinfoapp.ui.theme.dimen
-import com.erapps.moviesinfoapp.utils.convertDpToSp
 import com.erapps.moviesinfoapp.utils.getImageByPath
 import com.google.accompanist.pager.*
 import java.math.RoundingMode
-import kotlin.math.ceil
-import kotlin.math.floor
 
 @Composable
 fun HomeScreen(
@@ -58,12 +53,17 @@ fun HomeScreen(
     onCardClick: (Int) -> Unit
 ) {
     val tvShows = viewModel.tvShows.collectAsLazyPagingItems()
+    val netWorkStatus = getNetworkStatus()
 
     val uiState = when {
         tvShows.loadState.source.refresh == LoadState.Loading -> {
             UiState.Loading
         }
         tvShows.itemCount == 0 -> {
+            if (!netWorkStatus) {
+                viewModel.getLocalListOfTvShows()
+                UiState.Success(tvShows)
+            }
             UiState.Empty
         }
         else -> {
@@ -75,7 +75,8 @@ fun HomeScreen(
         uiState = uiState,
         onEmptyButtonClick = { viewModel.getFilteredTvShows(FilterBySelection.Popular.filter) },
         onFavsClick = onFavsClick,
-        onCardClick = onCardClick
+        onCardClick = onCardClick,
+        onCache = { viewModel.cacheTvShows(it) }
     ) { viewModel.getFilteredTvShows(it) }
 }
 
@@ -86,7 +87,8 @@ fun HomeScreen(
     onFavsClick: () -> Unit,
     onEmptyButtonClick: () -> Unit,
     onCardClick: (Int) -> Unit,
-    onFilterSelected: (String) -> Unit
+    onCache: (List<TvShow>) -> Unit,
+    onFilterSelected: (String) -> Unit,
 ) {
 
     Scaffold(
@@ -94,7 +96,7 @@ fun HomeScreen(
         topBar = { AppBar(onFavsClick) }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
-            ListAndFilter(onFilterSelected, uiState, onEmptyButtonClick, onCardClick)
+            ListAndFilter(onFilterSelected, uiState, onEmptyButtonClick, onCardClick, onCache)
         }
     }
 }
@@ -104,7 +106,8 @@ private fun ListAndFilter(
     onFilterSelected: (String) -> Unit,
     uiState: UiState?,
     onEmptyButtonClick: () -> Unit,
-    onCardClick: (Int) -> Unit
+    onCardClick: (Int) -> Unit,
+    onCache: (List<TvShow>) -> Unit
 ) {
     val selectedFilter = remember { mutableStateOf(getFilter("popular")) }
 
@@ -116,6 +119,7 @@ private fun ListAndFilter(
         HomeScreenContent(
             uiState = uiState,
             onEmptyButtonClick = onEmptyButtonClick,
+            onCache = onCache,
             onCardClick = onCardClick
         )
     }
@@ -123,7 +127,7 @@ private fun ListAndFilter(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun FilterChipGroup(
+private fun FilterChipGroup(
     modifier: Modifier = Modifier,
     filters: List<FilterBySelection> = getAllFilters(),
     selectedFilter: MutableState<FilterBySelection?>,
@@ -160,10 +164,11 @@ fun FilterChipGroup(
 }
 
 @Composable
-fun HomeScreenContent(
+private fun HomeScreenContent(
     uiState: UiState?,
     onEmptyButtonClick: () -> Unit,
-    onCardClick: (Int) -> Unit
+    onCardClick: (Int) -> Unit,
+    onCache: (List<TvShow>) -> Unit
 ) {
     val context = LocalContext.current
     val status = getNetworkStatus()
@@ -172,7 +177,7 @@ fun HomeScreenContent(
         uiState = uiState,
         onClick = onEmptyButtonClick
     ) {
-        TvShowList(it) { id ->
+        TvShowList(it, onCache) { id ->
             //only can go to details if internet is available
             if (status) {
                 onCardClick(id)
@@ -188,8 +193,9 @@ fun HomeScreenContent(
 }
 
 @Composable
-fun TvShowList(
+private fun TvShowList(
     tvShows: LazyPagingItems<TvShow>,
+    onCache: (List<TvShow>) -> Unit,
     onCardClick: (Int) -> Unit
 ) {
 
@@ -199,6 +205,7 @@ fun TvShowList(
         horizontalArrangement = Arrangement.Center
     ) {
         items(tvShows.itemCount) { i ->
+            onCache(listOf(tvShows[i]!!))
             TvShowListItem(tvShow = tvShows[i]!!, onCardClick = onCardClick)
         }
     }
@@ -206,7 +213,7 @@ fun TvShowList(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TvShowListItem(
+private fun TvShowListItem(
     modifier: Modifier = Modifier,
     tvShow: TvShow,
     onCardClick: (Int) -> Unit
@@ -234,7 +241,7 @@ fun TvShowListItem(
 }
 
 @Composable
-fun RatingSection(
+private fun RatingSection(
     modifier: Modifier = Modifier,
     tvShowRating: Double
 ) {
@@ -254,46 +261,6 @@ fun RatingSection(
     }
 }
 
-/*
-* Widget based on Angelo Rüggeber rating bar widget
-* Source: https://www.jetpackcompose.app/snippets/RatingBar
-* Author: Angelo Rüggeber modified by Luis Enrique Ramirez
- */
-@Composable
-fun RatingBar(
-    modifier: Modifier = Modifier,
-    rating: Double = 0.0,
-    stars: Int = 5,
-    starsColor: Color,
-) {
-
-    val filledStars = floor(rating).toInt()
-    val unfilledStars = (stars - ceil(rating)).toInt()
-    val halfStar = !(rating.rem(1).equals(0.0))
-
-    Row(modifier = modifier) {
-        repeat(filledStars) {
-            Icon(imageVector = Icons.Outlined.Star, contentDescription = null, tint = starsColor)
-        }
-
-        if (halfStar) {
-            Icon(
-                imageVector = Icons.Outlined.StarHalf,
-                contentDescription = null,
-                tint = starsColor
-            )
-        }
-
-        repeat(unfilledStars) {
-            Icon(
-                imageVector = Icons.Outlined.StarOutline,
-                contentDescription = null,
-                tint = starsColor
-            )
-        }
-    }
-}
-
 @Composable
 private fun TitleSection(
     modifier: Modifier = Modifier,
@@ -306,7 +273,7 @@ private fun TitleSection(
         fontWeight = FontWeight.Normal,
         color = MaterialTheme.colors.onBackground,
         textAlign = TextAlign.Start,
-        fontSize = MaterialTheme.dimen.textSmall.convertDpToSp(),
+        fontSize = MaterialTheme.typography.subtitle1.fontSize,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
     )
@@ -335,7 +302,7 @@ private fun ImageSection(
 }
 
 @Composable
-fun AppBar(onFavsClick: () -> Unit) {
+private fun AppBar(onFavsClick: () -> Unit) {
     TopAppBar(
         title = {
             Text(
@@ -347,7 +314,7 @@ fun AppBar(onFavsClick: () -> Unit) {
         actions = {
             IconButton(onClick = onFavsClick) {
                 Icon(
-                    imageVector = Icons.Default.Favorite,
+                    imageVector = Icons.Default.AccountCircle,
                     tint = Color.White,
                     contentDescription = null
                 )

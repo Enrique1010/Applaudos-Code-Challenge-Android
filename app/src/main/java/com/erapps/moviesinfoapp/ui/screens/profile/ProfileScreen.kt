@@ -1,4 +1,4 @@
-package com.erapps.moviesinfoapp.ui.screens.favs
+package com.erapps.moviesinfoapp.ui.screens.profile
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -12,14 +12,14 @@ import androidx.compose.ui.res.stringResource
 import com.erapps.moviesinfoapp.R
 
 @Composable
-fun FavsScreen(
+fun ProfileScreen(
     onBackPressed: () -> Unit
 ) {
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(id = R.string.favs_tv_shows), color = Color.White) },
+                title = { Text(text = stringResource(id = R.string.profile), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
                         Icon(
@@ -41,7 +41,7 @@ fun FavsScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Favs")
+            Text(text = "Profile")
         }
     }
 }

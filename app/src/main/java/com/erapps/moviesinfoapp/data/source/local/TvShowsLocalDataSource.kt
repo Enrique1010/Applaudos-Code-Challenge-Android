@@ -1,6 +1,5 @@
 package com.erapps.moviesinfoapp.data.source.local
 
-import com.erapps.moviesinfoapp.data.api.models.TvShow
 import com.erapps.moviesinfoapp.data.room.daos.MovieListDao
 import com.erapps.moviesinfoapp.data.room.entities.MovieListEntity
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +11,7 @@ import javax.inject.Inject
 
 interface TvShowsLocalDataSource {
     suspend fun insertTvShows(movieListEntity: MovieListEntity)
-    fun getCachedTvShows(): Flow<List<TvShow>>
+    fun getCachedTvShows(): Flow<MovieListEntity?>
     suspend fun clearCachedTvShows()
 }
 
@@ -25,8 +24,8 @@ class TvShowsLocalDataSourceImp @Inject constructor(
             movieListDao.insertMovies(movieListEntity)
         }
 
-    override fun getCachedTvShows(): Flow<List<TvShow>> = flow {
-        emit(movieListDao.getCachedMovies()?.tvShows ?: emptyList())
+    override fun getCachedTvShows(): Flow<MovieListEntity?> = flow {
+        emit(movieListDao.getCachedMovies())
     }.flowOn(Dispatchers.IO)
 
     override suspend fun clearCachedTvShows() = withContext(Dispatchers.IO) {

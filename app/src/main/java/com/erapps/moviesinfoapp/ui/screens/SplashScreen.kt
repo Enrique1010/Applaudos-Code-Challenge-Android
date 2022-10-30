@@ -18,7 +18,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.erapps.moviesinfoapp.R
 import com.erapps.moviesinfoapp.ui.theme.dimen
-import com.erapps.moviesinfoapp.utils.convertDpToSp
 import kotlinx.coroutines.delay
 
 @Composable
@@ -57,7 +56,7 @@ private fun SplashScreen() {
             horizontalArrangement = Arrangement.Center
         ) {
             Icon(
-                modifier = Modifier.size(MaterialTheme.dimen.imageLarge),
+                modifier = Modifier.size(MaterialTheme.dimen.imageMedium),
                 imageVector = Icons.Default.PlayCircle,
                 tint = Color.White,
                 contentDescription = null
@@ -68,7 +67,7 @@ private fun SplashScreen() {
                 text = stringResource(id = R.string.app_title),
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
-                fontSize = MaterialTheme.dimen.textExtraLarge.convertDpToSp()
+                fontSize = MaterialTheme.typography.h4.fontSize
             )
         }
     }

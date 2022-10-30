@@ -2,6 +2,7 @@ package com.erapps.moviesinfoapp.data.room
 
 import androidx.room.TypeConverter
 import com.erapps.moviesinfoapp.data.api.models.TvShow
+import com.erapps.moviesinfoapp.data.room.entities.FavoriteTvShow
 import com.erapps.moviesinfoapp.data.room.entities.MovieListEntity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -30,6 +31,19 @@ object Converters {
         if (json.isEmpty()) return emptyList()
 
         val listType = object : TypeToken<List<TvShow>>() {}.type
+        return gson.fromJson(json, listType)
+    }
+
+    @TypeConverter
+    fun favsTvShowListToString(tvShows: List<FavoriteTvShow>): String? {
+        return gson.toJson(tvShows)
+    }
+
+    @TypeConverter
+    fun stringToFavsTvShowList(json: String): List<FavoriteTvShow>? {
+        if (json.isEmpty()) return emptyList()
+
+        val listType = object : TypeToken<List<FavoriteTvShow>>() {}.type
         return gson.fromJson(json, listType)
     }
 
@@ -69,5 +83,16 @@ object Converters {
     fun stringToTvShow(json: String): TvShow? {
 
         return gson.fromJson(json, TvShow::class.java)
+    }
+
+    @TypeConverter
+    fun favTvShowToString(tvShow: FavoriteTvShow): String? {
+        return gson.toJson(tvShow)
+    }
+
+    @TypeConverter
+    fun stringToFavTvShow(json: String): FavoriteTvShow? {
+
+        return gson.fromJson(json, FavoriteTvShow::class.java)
     }
 }

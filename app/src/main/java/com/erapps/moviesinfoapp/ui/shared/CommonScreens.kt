@@ -2,52 +2,37 @@ package com.erapps.moviesinfoapp.ui.shared
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarHalf
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.erapps.moviesinfoapp.R
 import com.erapps.moviesinfoapp.ui.theme.dimen
-import com.erapps.moviesinfoapp.utils.convertDpToSp
+import kotlin.math.ceil
+import kotlin.math.floor
 
 @Composable
 fun <T> DetailsPageWithState(
-    previousBackGroundColor: Color,
     uiState: UiState?,
-    emptyText: Int? = null,
-    onBackPressed: () -> Unit,
+    modifier: Modifier = Modifier,
     successBlock: @Composable (T) -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        MaterialTheme.colors.surface,
-                        previousBackGroundColor,
-                        MaterialTheme.colors.surface
-                    )
-                )
-            )
+        modifier = modifier.fillMaxSize()
     ) {
         when (uiState) {
             UiState.Loading -> {
                 LoadingScreen(modifier = Modifier.background(MaterialTheme.colors.surface))
-            }
-            is UiState.Empty -> {
-                emptyText?.let {
-                    ScreenWithMessage(message = emptyText)
-                }
             }
             is UiState.Error -> {
                 ErrorScreen(
@@ -61,7 +46,6 @@ fun <T> DetailsPageWithState(
             }
             else -> {}
         }
-        BackButtonBar(onBackPressed = onBackPressed)
     }
 }
 
@@ -97,6 +81,46 @@ fun <T> PageWithState(
     }
 }
 
+/*
+* Widget based on Angelo Rüggeber rating bar widget
+* Source: https://www.jetpackcompose.app/snippets/RatingBar
+* Author: Angelo Rüggeber modified by Luis Enrique Ramirez
+ */
+@Composable
+fun RatingBar(
+    modifier: Modifier = Modifier,
+    rating: Double = 0.0,
+    stars: Int = 5,
+    starsColor: Color,
+) {
+
+    val filledStars = floor(rating).toInt()
+    val unfilledStars = (stars - ceil(rating)).toInt()
+    val halfStar = !(rating.rem(1).equals(0.0))
+
+    Row(modifier = modifier) {
+        repeat(filledStars) {
+            Icon(imageVector = Icons.Outlined.Star, contentDescription = null, tint = starsColor)
+        }
+
+        if (halfStar) {
+            Icon(
+                imageVector = Icons.Outlined.StarHalf,
+                contentDescription = null,
+                tint = starsColor
+            )
+        }
+
+        repeat(unfilledStars) {
+            Icon(
+                imageVector = Icons.Outlined.StarOutline,
+                contentDescription = null,
+                tint = starsColor
+            )
+        }
+    }
+}
+
 @Composable
 fun BackButtonBar(
     modifier: Modifier = Modifier,
@@ -107,37 +131,14 @@ fun BackButtonBar(
             .background(Color.Transparent),
         contentAlignment = Alignment.TopStart
     ) {
-        Icon(
-            modifier = modifier
-                .size(MaterialTheme.dimen.large)
-                .offset(
-                    MaterialTheme.dimen.small,
-                    MaterialTheme.dimen.small
-                )
-                .clickable { onBackPressed() },
-            imageVector = Icons.Default.ArrowBack,
-            tint = MaterialTheme.colors.onBackground,
-            contentDescription = null
-        )
-    }
-}
-
-@Composable
-fun ScreenWithMessage(
-    modifier: Modifier = Modifier,
-    message: Int
-) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = stringResource(id = message),
-            fontSize = MaterialTheme.dimen.textMedium.convertDpToSp(),
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
+        IconButton(onClick = onBackPressed) {
+            Icon(
+                modifier = modifier.size(MaterialTheme.dimen.large),
+                imageVector = Icons.Default.ArrowBack,
+                tint = Color.White,
+                contentDescription = null
+            )
+        }
     }
 }
 
@@ -154,7 +155,7 @@ fun ScreenWithMessage(
     ) {
         Text(
             text = stringResource(id = message),
-            fontSize = MaterialTheme.dimen.textMedium.convertDpToSp(),
+            fontSize = MaterialTheme.typography.h6.fontSize,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
@@ -216,7 +217,7 @@ fun ErrorScreen(
         errorMessage?.let {
             Text(
                 text = it,
-                fontSize = MaterialTheme.dimen.textMedium.convertDpToSp(),
+                fontSize = MaterialTheme.typography.h6.fontSize,
                 fontWeight = FontWeight.Bold
             )
             return@Column
@@ -224,7 +225,7 @@ fun ErrorScreen(
         errorStringResource?.let {
             Text(
                 text = stringResource(id = it),
-                fontSize = MaterialTheme.dimen.textMedium.convertDpToSp(),
+                fontSize = MaterialTheme.typography.h6.fontSize,
                 fontWeight = FontWeight.Bold
             )
             return@Column

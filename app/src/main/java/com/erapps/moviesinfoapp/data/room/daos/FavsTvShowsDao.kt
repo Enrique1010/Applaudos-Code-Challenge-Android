@@ -5,16 +5,20 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.erapps.moviesinfoapp.data.api.models.TvShow
+import com.erapps.moviesinfoapp.data.room.entities.FavoriteTvShow
 
 @Dao
 interface FavsTvShowsDao {
 
-    @Query("select * from fav_tvShow")
-    suspend fun getFavsTvShows(): List<TvShow>
+    @Query("select * from favoritetvshow")
+    suspend fun getFavsTvShows(): List<FavoriteTvShow>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertFavTvShow(tvShow: TvShow)
+    suspend fun insertFavTvShow(tvShow: FavoriteTvShow)
 
-    @Query("delete from fav_tvShow where id = :id")
+    @Query("select id from favoritetvshow where id = :id")
+    suspend fun getFavId(id: Int): Int?
+
+    @Query("delete from favoritetvshow where id = :id")
     suspend fun deleteFavTvShow(id: Int)
 }

@@ -21,11 +21,8 @@ sealed class NavItem(
 
     //main navigation
     object Home : NavItem("home")
-    object Favs : NavItem("favs")
+    object Profile : NavItem("profile")
     object Details : NavItem("details", listOf(NavArgs.DetailsId)) {
-        fun createRoute(id: Int) = "$baseRoute/$id"
-    }
-    object SeasonDetails : NavItem("seasonDetails", listOf(NavArgs.SeasonDetailsId)) {
         fun createRoute(id: Int) = "$baseRoute/$id"
     }
 }
@@ -34,6 +31,5 @@ enum class NavArgs(
     val key: String,
     val navType: NavType<*>
 ) {
-    DetailsId("detailsId", NavType.IntType),
-    SeasonDetailsId("seasonDetailsId", NavType.IntType)
+    DetailsId("detailsId", NavType.IntType)
 }

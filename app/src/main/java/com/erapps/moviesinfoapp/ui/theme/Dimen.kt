@@ -17,12 +17,6 @@ data class Dimen(
     val large: Dp = 32.dp,
     val extraLarge: Dp = 64.dp,
     val extraExtraLarge: Dp = 128.dp,
-    //text size
-    val textExtraSmall: Dp = 12.dp,
-    val textSmall: Dp = 16.dp,
-    val textMedium: Dp = 20.dp,
-    val textLarge: Dp = 28.dp,
-    val textExtraLarge: Dp = 36.dp,
     //border and elevation
     val borderThing: Dp = 1.dp,
     val borderMedium: Dp = 4.dp,
@@ -34,7 +28,8 @@ data class Dimen(
     //images
     val imageDefault: Dp = 24.dp,
     val imageSmall: Dp = 32.dp,
-    val imageLarge: Dp = 96.dp,
+    val imageMedium: Dp = 96.dp,
+    val imageLarge: Dp = 144.dp,
     val imageExtraLarge: Dp = 176.dp
 )
 

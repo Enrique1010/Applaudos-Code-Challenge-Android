@@ -4,6 +4,8 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.erapps.moviesinfoapp.data.api.models.TvShow
+import com.erapps.moviesinfoapp.data.room.entities.MovieListEntity
+import com.erapps.moviesinfoapp.data.source.local.TvShowsLocalDataSource
 import com.erapps.moviesinfoapp.data.source.remote.TvShowsRemoteDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -14,10 +16,14 @@ interface TvShowsRepository {
     fun getFilteredTvShows(filter: String): Flow<PagingData<TvShow>>
 
     //local data management
+    suspend fun insertTvShows(movieListEntity: MovieListEntity)
+    fun getCachedTvShows(): Flow<MovieListEntity?>
+    suspend fun clearCachedTvShows()
 }
 
 class TvShowsRepositoryImp @Inject constructor(
-    private val tvShowsRemoteDataSource: TvShowsRemoteDataSource
+    private val tvShowsRemoteDataSource: TvShowsRemoteDataSource,
+    private val tvShowsLocalDataSource: TvShowsLocalDataSource
 ): TvShowsRepository {
 
     override fun getFilteredTvShows(filter: String) = Pager(
@@ -27,5 +33,17 @@ class TvShowsRepositoryImp @Inject constructor(
         ),
         pagingSourceFactory = { TvShowsPagingSource(tvShowsRemoteDataSource, filter) }
     ).flow.flowOn(Dispatchers.Default)
+
+    override suspend fun insertTvShows(movieListEntity: MovieListEntity) {
+        tvShowsLocalDataSource.insertTvShows(movieListEntity)
+    }
+
+    override fun getCachedTvShows(): Flow<MovieListEntity?> {
+        return tvShowsLocalDataSource.getCachedTvShows()
+    }
+
+    override suspend fun clearCachedTvShows() {
+        tvShowsLocalDataSource.clearCachedTvShows()
+    }
 
 }

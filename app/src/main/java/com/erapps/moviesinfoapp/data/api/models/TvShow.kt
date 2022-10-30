@@ -3,7 +3,7 @@ package com.erapps.moviesinfoapp.data.api.models
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "fav_tvShow")
+@Entity
 data class TvShow(
     val backdrop_path: String? = null,
     val first_air_date: String,

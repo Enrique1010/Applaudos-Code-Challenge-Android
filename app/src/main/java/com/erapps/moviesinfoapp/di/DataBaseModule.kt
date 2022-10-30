@@ -24,7 +24,7 @@ object DataBaseModule {
 
     @Singleton
     @Provides
-    fun provideFavsTvShowsDaoDao(moviesInfoAppDataBase: MoviesInfoAppDataBase): FavsTvShowsDao {
+    fun provideFavsTvShowsDao(moviesInfoAppDataBase: MoviesInfoAppDataBase): FavsTvShowsDao {
         return moviesInfoAppDataBase.favsTvShowsDao()
     }
 

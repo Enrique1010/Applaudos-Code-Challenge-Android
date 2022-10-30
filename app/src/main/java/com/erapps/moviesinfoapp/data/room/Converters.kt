@@ -3,7 +3,6 @@ package com.erapps.moviesinfoapp.data.room
 import androidx.room.TypeConverter
 import com.erapps.moviesinfoapp.data.api.models.TvShow
 import com.erapps.moviesinfoapp.data.room.entities.FavoriteTvShow
-import com.erapps.moviesinfoapp.data.room.entities.MovieListEntity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -11,16 +10,6 @@ object Converters {
     private val gson = Gson()
 
     //lists and entities
-    @TypeConverter
-    fun movieListEntityToString(movieListEntity: MovieListEntity): String? {
-        return gson.toJson(movieListEntity)
-    }
-
-    @TypeConverter
-    fun stringToMovieListEntity(json: String): MovieListEntity? {
-        return gson.fromJson(json, MovieListEntity::class.java)
-    }
-
     @TypeConverter
     fun tvShowListToString(tvShows: List<TvShow>): String? {
         return gson.toJson(tvShows)

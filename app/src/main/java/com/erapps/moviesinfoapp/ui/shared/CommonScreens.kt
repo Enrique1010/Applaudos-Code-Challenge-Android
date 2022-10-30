@@ -17,7 +17,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.erapps.moviesinfoapp.R
-import com.erapps.moviesinfoapp.ui.theme.dimen
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -98,13 +97,19 @@ fun RatingBar(
     val unfilledStars = (stars - ceil(rating)).toInt()
     val halfStar = !(rating.rem(1).equals(0.0))
 
-    Row(modifier = modifier) {
+    Row {
         repeat(filledStars) {
-            Icon(imageVector = Icons.Outlined.Star, contentDescription = null, tint = starsColor)
+            Icon(
+                modifier = modifier,
+                imageVector = Icons.Outlined.Star,
+                contentDescription = null,
+                tint = starsColor
+            )
         }
 
         if (halfStar) {
             Icon(
+                modifier = modifier,
                 imageVector = Icons.Outlined.StarHalf,
                 contentDescription = null,
                 tint = starsColor
@@ -113,6 +118,7 @@ fun RatingBar(
 
         repeat(unfilledStars) {
             Icon(
+                modifier = modifier,
                 imageVector = Icons.Outlined.StarOutline,
                 contentDescription = null,
                 tint = starsColor
@@ -127,13 +133,13 @@ fun BackButtonBar(
     onBackPressed: () -> Unit
 ) {
     Box(
-        modifier = modifier
+        modifier = Modifier
             .background(Color.Transparent),
         contentAlignment = Alignment.TopStart
     ) {
         IconButton(onClick = onBackPressed) {
             Icon(
-                modifier = modifier.size(MaterialTheme.dimen.large),
+                modifier = modifier,
                 imageVector = Icons.Default.ArrowBack,
                 tint = Color.White,
                 contentDescription = null

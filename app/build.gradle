@@ -104,6 +104,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager-indicators:$pagerVersion"
     //hilt
     implementation "com.google.dagger:hilt-android:$rootProject.hiltVersion"
+    implementation 'androidx.window:window:1.0.0'
     kapt "com.google.dagger:hilt-android-compiler:$rootProject.hiltVersion"
     kapt "androidx.hilt:hilt-compiler:$hiltCompiler"
     implementation "androidx.hilt:hilt-navigation-compose:$hiltCompiler"

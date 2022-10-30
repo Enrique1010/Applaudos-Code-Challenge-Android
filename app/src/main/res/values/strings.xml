@@ -17,5 +17,6 @@
     <string name="my_favs_title">My Favorites</string>
     <string name="john_doe_name">John Doe</string>
     <string name="john_doe_username">\@john_doe</string>
-    <string name="logout_btn_text">Log Out</string>
+    <string name="logout_btn_text">LOG OUT</string>
+    <string name="default_filter">popular</string>
 </resources>

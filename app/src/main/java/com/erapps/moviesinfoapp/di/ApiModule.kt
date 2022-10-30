@@ -3,6 +3,8 @@ package com.erapps.moviesinfoapp.di
 import com.erapps.moviesinfoapp.BuildConfig
 import com.erapps.moviesinfoapp.data.api.NetworkResponseAdapterFactory
 import com.erapps.moviesinfoapp.data.api.TheMovieDBApiService
+import com.erapps.moviesinfoapp.utils.ExcludeDeserializationStrategy
+import com.erapps.moviesinfoapp.utils.ExcludeSerializationStrategy
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -43,7 +45,11 @@ object ApiModule {
     @Singleton
     @Provides
     fun provideGsonConverterFactory(): GsonConverterFactory {
-        val json = Gson().newBuilder().setLenient().create()
+        val json = Gson().newBuilder()
+            .addSerializationExclusionStrategy(ExcludeSerializationStrategy())
+            .addDeserializationExclusionStrategy(ExcludeDeserializationStrategy())
+            .setLenient()
+            .create()
 
         return GsonConverterFactory.create(json)
     }

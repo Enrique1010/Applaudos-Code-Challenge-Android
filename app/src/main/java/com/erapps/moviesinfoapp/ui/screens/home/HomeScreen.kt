@@ -12,9 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,10 +36,7 @@ import com.erapps.moviesinfoapp.data.api.models.FilterBySelection
 import com.erapps.moviesinfoapp.data.api.models.TvShow
 import com.erapps.moviesinfoapp.data.api.models.getAllFilters
 import com.erapps.moviesinfoapp.data.api.models.getFilter
-import com.erapps.moviesinfoapp.ui.shared.PageWithState
-import com.erapps.moviesinfoapp.ui.shared.RatingBar
-import com.erapps.moviesinfoapp.ui.shared.UiState
-import com.erapps.moviesinfoapp.ui.shared.getNetworkStatus
+import com.erapps.moviesinfoapp.ui.shared.*
 import com.erapps.moviesinfoapp.ui.theme.dimen
 import com.erapps.moviesinfoapp.utils.getImageByPath
 import com.google.accompanist.pager.*
@@ -88,16 +83,25 @@ fun HomeScreen(
     onFavsClick: () -> Unit,
     onEmptyButtonClick: () -> Unit,
     onCardClick: (Int) -> Unit,
-    onCache: (List<TvShow>) -> Unit,
+    onCache: (TvShow) -> Unit,
     onFilterSelected: (String) -> Unit,
 ) {
 
+    val windowSize = rememberWindowSize()
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { AppBar(onFavsClick) }
+        topBar = { AppBar(windowSize ,onFavsClick) }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
-            ListAndFilter(onFilterSelected, uiState, onEmptyButtonClick, onCardClick, onCache)
+            ListAndFilter(
+                onFilterSelected,
+                uiState,
+                windowSize,
+                onEmptyButtonClick,
+                onCardClick,
+                onCache
+            )
         }
     }
 }
@@ -106,13 +110,17 @@ fun HomeScreen(
 private fun ListAndFilter(
     onFilterSelected: (String) -> Unit,
     uiState: UiState?,
+    windowSizeClass: WindowSizeClass,
     onEmptyButtonClick: () -> Unit,
     onCardClick: (Int) -> Unit,
-    onCache: (List<TvShow>) -> Unit
+    onCache: (TvShow) -> Unit
 ) {
 
     Column {
-        FilterChipGroup(onFilterSelected = onFilterSelected)
+        FilterChipGroup(
+            onFilterSelected = onFilterSelected,
+            windowSize = windowSizeClass
+        )
         HomeScreenContent(
             uiState = uiState,
             onEmptyButtonClick = onEmptyButtonClick,
@@ -127,10 +135,16 @@ private fun ListAndFilter(
 private fun FilterChipGroup(
     modifier: Modifier = Modifier,
     filters: List<FilterBySelection> = getAllFilters(),
-    onFilterSelected: (String) -> Unit
+    onFilterSelected: (String) -> Unit,
+    windowSize: WindowSizeClass
 ) {
 
-    val selectedFilter = rememberSaveable { mutableStateOf(getFilter("popular")) }
+    val defaultFilter = stringResource(id = R.string.default_filter)
+    val selectedFilter = rememberSaveable { mutableStateOf(getFilter(defaultFilter)) }
+
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact
+    val fontSize =
+        if (windowSizeCondition) MaterialTheme.typography.subtitle1.fontSize else MaterialTheme.typography.h5.fontSize
 
     Column(modifier = modifier.padding(MaterialTheme.dimen.small)) {
         LazyRow {
@@ -154,7 +168,11 @@ private fun FilterChipGroup(
                         selectedContentColor = Color.White
                     )
                 ) {
-                    Text(text = filter.filter.capitalize(Locale.current).replace("_", " "))
+                    Text(
+                        modifier = Modifier.padding(MaterialTheme.dimen.small),
+                        text = filter.filter.capitalize(Locale.current).replace("_", " "),
+                        fontSize = fontSize
+                    )
                 }
             }
         }
@@ -166,7 +184,7 @@ private fun HomeScreenContent(
     uiState: UiState?,
     onEmptyButtonClick: () -> Unit,
     onCardClick: (Int) -> Unit,
-    onCache: (List<TvShow>) -> Unit
+    onCache: (TvShow) -> Unit
 ) {
     val context = LocalContext.current
     val status = getNetworkStatus()
@@ -193,17 +211,24 @@ private fun HomeScreenContent(
 @Composable
 private fun TvShowList(
     tvShows: LazyPagingItems<TvShow>,
-    onCache: (List<TvShow>) -> Unit,
+    onCache: (TvShow) -> Unit,
     onCardClick: (Int) -> Unit
 ) {
 
+    val windowSize = rememberWindowSize()
+    val amountOfGrids =
+        if (
+            windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact ||
+            windowSize.screenHeightInfo is WindowSizeClass.WindowType.Medium
+        ) 2 else 4
+
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(amountOfGrids),
         verticalArrangement = Arrangement.Center,
         horizontalArrangement = Arrangement.Center
     ) {
         items(tvShows.itemCount) { i ->
-            onCache(listOf(tvShows[i]!!))
+            onCache(tvShows[i]!!)
             TvShowListItem(tvShow = tvShows[i]!!, onCardClick = onCardClick)
         }
     }
@@ -217,8 +242,17 @@ private fun TvShowListItem(
     onCardClick: (Int) -> Unit
 ) {
 
+    val windowSize = rememberWindowSize()
+    val paddingValue =
+        if (
+            windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact ||
+            windowSize.screenHeightInfo is WindowSizeClass.WindowType.Medium
+        ) MaterialTheme.dimen.small else MaterialTheme.dimen.medium
+
     Card(
-        modifier = modifier.padding(MaterialTheme.dimen.small),
+        modifier = modifier
+            .padding(paddingValue)
+            .wrapContentSize(align = Alignment.Center),
         shape = RoundedCornerShape(MaterialTheme.dimen.borderRounded),
         elevation = MaterialTheme.dimen.elevationNormal,
         onClick = { onCardClick(tvShow.id) }
@@ -229,7 +263,7 @@ private fun TvShowListItem(
             Column(
                 modifier = Modifier.padding(MaterialTheme.dimen.small)
             ) {
-                TitleSection(tvShowName = tvShow.name)
+                TitleSection(tvShowName = tvShow.name, windowSize = windowSize)
                 Spacer(modifier = Modifier.height(MaterialTheme.dimen.small))
                 RatingSection(tvShowRating = tvShow.vote_average)
                 Spacer(modifier = Modifier.height(MaterialTheme.dimen.small))
@@ -262,16 +296,23 @@ fun RatingSection(
 @Composable
 fun TitleSection(
     modifier: Modifier = Modifier,
+    windowSize: WindowSizeClass,
     tvShowName: String
 ) {
+
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact
+    val fontWeight =
+        if (windowSizeCondition) FontWeight.Normal else FontWeight.Bold
+    val fontTitleSize =
+        if (windowSizeCondition) MaterialTheme.typography.subtitle1.fontSize else MaterialTheme.typography.h5.fontSize
 
     Text(
         modifier = modifier.fillMaxWidth(),
         text = tvShowName.capitalize(Locale.current),
-        fontWeight = FontWeight.Normal,
+        fontWeight = fontWeight,
         color = MaterialTheme.colors.onBackground,
         textAlign = TextAlign.Start,
-        fontSize = MaterialTheme.typography.subtitle1.fontSize,
+        fontSize = fontTitleSize,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
     )
@@ -285,7 +326,9 @@ fun ImageSection(
     val context = LocalContext.current
 
     SubcomposeAsyncImage(
-        modifier = modifier.size(MaterialTheme.dimen.imageExtraLarge),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(MaterialTheme.dimen.imageLarge),
         model = ImageRequest.Builder(context)
             .data(imageUrl.getImageByPath())
             .placeholder(R.drawable.ic_image_placeholder)
@@ -293,29 +336,41 @@ fun ImageSection(
             .crossfade(true)
             .build(),
         contentDescription = null,
-        alignment = Alignment.Center,
         loading = { LinearProgressIndicator() },
-        contentScale = ContentScale.FillWidth
+        contentScale = ContentScale.Crop
     )
 }
 
 @Composable
-private fun AppBar(onFavsClick: () -> Unit) {
+private fun AppBar(windowSize: WindowSizeClass, onFavsClick: () -> Unit) {
+
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact
+    val fontSize =
+        if (windowSizeCondition) MaterialTheme.typography.h6.fontSize else MaterialTheme.typography.h4.fontSize
+    val appBarHeight =
+        if (windowSizeCondition) MaterialTheme.dimen.appBarNormal else MaterialTheme.dimen.appBarLarge
+    val iconButtonSize =
+        if (windowSizeCondition) MaterialTheme.dimen.extraLarge else MaterialTheme.dimen.extraExtraLarge
+    val iconSize =
+        if (windowSizeCondition) MaterialTheme.dimen.large else MaterialTheme.dimen.extraLarge
+
     TopAppBar(
+        modifier = Modifier.fillMaxWidth().height(appBarHeight),
         title = {
             Text(
                 text = stringResource(id = R.string.tv_shows_title),
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = Color.White,
+                fontSize = fontSize
             )
         },
         actions = {
             IconButton(
-                modifier = Modifier.size(MaterialTheme.dimen.extraLarge),
+                modifier = Modifier.size(iconButtonSize),
                 onClick = onFavsClick
             ) {
                 Icon(
-                    modifier = Modifier.size(MaterialTheme.dimen.large),
+                    modifier = Modifier.size(iconSize),
                     imageVector = Icons.Default.AccountCircle,
                     tint = Color.White,
                     contentDescription = null

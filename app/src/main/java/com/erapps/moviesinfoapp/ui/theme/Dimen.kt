@@ -14,7 +14,9 @@ data class Dimen(
     val extraSmall: Dp = 4.dp,
     val small: Dp = 8.dp,
     val medium: Dp = 16.dp,
+    val smallMedium: Dp = 24.dp,
     val large: Dp = 32.dp,
+    val mediumLarge: Dp = 40.dp,
     val extraLarge: Dp = 64.dp,
     val extraExtraLarge: Dp = 128.dp,
     val mediumButtonSize: Dp = 48.dp,
@@ -26,12 +28,15 @@ data class Dimen(
     val elevationNormal: Dp = 10.dp,
     //rounder corner shapes
     val roundedMedium: Dp = 10.dp,
+    //appbar size
+    val appBarNormal: Dp = 48.dp,
+    val appBarLarge: Dp = 96.dp,
     //images
     val imageDefault: Dp = 24.dp,
     val imageSmall: Dp = 32.dp,
     val imageMedium: Dp = 96.dp,
     val imageLarge: Dp = 144.dp,
-    val imageExtraLarge: Dp = 176.dp
+    val imageExtraLarge: Dp = 200.dp
 )
 
 val LocalDimen = compositionLocalOf { Dimen() }

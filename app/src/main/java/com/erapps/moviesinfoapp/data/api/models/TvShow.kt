@@ -2,6 +2,7 @@ package com.erapps.moviesinfoapp.data.api.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.erapps.moviesinfoapp.utils.Exclude
 
 @Entity
 data class TvShow(
@@ -18,5 +19,7 @@ data class TvShow(
     val popularity: Double,
     val poster_path: String,
     val vote_average: Double,
-    val vote_count: Int
+    val vote_count: Int,
+    @Exclude
+    val timestamp: Long = System.currentTimeMillis()
 )

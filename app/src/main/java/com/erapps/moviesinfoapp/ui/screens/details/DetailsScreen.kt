@@ -34,10 +34,7 @@ import com.erapps.moviesinfoapp.R
 import com.erapps.moviesinfoapp.data.api.models.tvshowdetails.ShortSeason
 import com.erapps.moviesinfoapp.data.api.models.tvshowdetails.TvShowDetails
 import com.erapps.moviesinfoapp.data.room.entities.FavoriteTvShow
-import com.erapps.moviesinfoapp.ui.shared.BackButtonBar
-import com.erapps.moviesinfoapp.ui.shared.DetailsPageWithState
-import com.erapps.moviesinfoapp.ui.shared.RatingBar
-import com.erapps.moviesinfoapp.ui.shared.UiState
+import com.erapps.moviesinfoapp.ui.shared.*
 import com.erapps.moviesinfoapp.ui.theme.dimen
 import com.erapps.moviesinfoapp.utils.getImageByPath
 
@@ -97,11 +94,17 @@ fun DetailsScreen(
     onBackPressed: () -> Unit
 ) {
     val lazyListState = rememberLazyListState()
+    val windowSize = rememberWindowSize()
     val firstItemVisible by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex >= 1
         }
     }
+
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact ||
+            windowSize.screenHeightInfo is WindowSizeClass.WindowType.Medium
+    val paddingValue =
+        if (windowSizeCondition) MaterialTheme.dimen.mediumLarge else MaterialTheme.dimen.extraLarge
 
     DetailsPageWithState<TvShowDetails>(
         uiState = uiState,
@@ -117,6 +120,7 @@ fun DetailsScreen(
                 ) {
                     AppBar(
                         titleText = tvShowDetails.name,
+                        windowSize = windowSize,
                         onBackPressed = onBackPressed
                     )
                 }
@@ -130,6 +134,7 @@ fun DetailsScreen(
                 item {
                     HeaderSection(
                         modifier = Modifier,
+                        windowSize = windowSize,
                         imageUrl = tvShowDetails.backdrop_path,
                         name = tvShowDetails.name,
                         average = (tvShowDetails.vote_average / 2)
@@ -137,17 +142,26 @@ fun DetailsScreen(
                 }
                 item {
                     SummarySection(
+                        windowSize = windowSize,
                         tvShowDetails = tvShowDetails,
                         isInFavorites = isInFavorites,
                         onFavButtonClick = onFavButtonClick
                     )
                 }
                 item {
-                    SeasonsSection(seasons = tvShowDetails.seasons)
+                    SeasonsSection(
+                        windowSize = windowSize,
+                        seasons = tvShowDetails.seasons
+                    )
                 }
             }
             if (!firstItemVisible) {
-                BackButtonBar(onBackPressed = onBackPressed)
+                BackButtonBar(
+                    modifier = Modifier
+                        .size(paddingValue)
+                        .padding(MaterialTheme.dimen.small),
+                    onBackPressed = onBackPressed
+                )
             }
         }
     }
@@ -157,22 +171,38 @@ fun DetailsScreen(
 fun AppBar(
     modifier: Modifier = Modifier,
     titleText: String,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    windowSize: WindowSizeClass
 ) {
 
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact
+    val fontSize =
+        if (windowSizeCondition) MaterialTheme.typography.h6.fontSize else MaterialTheme.typography.h4.fontSize
+    val appBarHeight =
+        if (windowSizeCondition) MaterialTheme.dimen.appBarNormal else MaterialTheme.dimen.appBarLarge
+    val iconButtonSize =
+        if (windowSizeCondition) MaterialTheme.dimen.mediumLarge else MaterialTheme.dimen.extraLarge
+    val iconSize =
+        if (windowSizeCondition) MaterialTheme.dimen.smallMedium else MaterialTheme.dimen.mediumLarge
+
     TopAppBar(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth().height(appBarHeight),
         title = {
             Text(
                 text = titleText,
                 color = Color.White,
                 maxLines = 1,
+                fontSize = fontSize,
                 overflow = TextOverflow.Ellipsis
             )
         },
         navigationIcon = {
-            IconButton(onClick = onBackPressed) {
+            IconButton(
+                modifier = Modifier.size(iconButtonSize),
+                onClick = onBackPressed
+            ) {
                 Icon(
+                    modifier = Modifier.size(iconSize),
                     imageVector = Icons.Default.ArrowBack,
                     tint = Color.White,
                     contentDescription = null
@@ -188,9 +218,17 @@ fun HeaderSection(
     modifier: Modifier = Modifier,
     imageUrl: String,
     name: String,
-    average: Double
+    average: Double,
+    windowSize: WindowSizeClass
 ) {
     val context = LocalContext.current
+
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact
+
+    val paddingValue =
+        if (windowSizeCondition) MaterialTheme.dimen.large else MaterialTheme.dimen.extraLarge
+    val textSize =
+        if (windowSizeCondition) MaterialTheme.typography.h6.fontSize else MaterialTheme.typography.h4.fontSize
 
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -218,12 +256,13 @@ fun HeaderSection(
         ) {
             Text(
                 text = name,
-                fontSize = MaterialTheme.typography.h6.fontSize,
+                fontSize = textSize,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(MaterialTheme.dimen.small))
             RatingBar(
+                modifier = Modifier.size(paddingValue),
                 rating = average,
                 starsColor = MaterialTheme.colors.secondary
             )
@@ -235,9 +274,16 @@ fun HeaderSection(
 fun SummarySection(
     tvShowDetails: TvShowDetails,
     isInFavorites: Boolean,
-    onFavButtonClick: (TvShowDetails) -> Unit
+    onFavButtonClick: (TvShowDetails) -> Unit,
+    windowSize: WindowSizeClass
 ) {
     val context = LocalContext.current
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact
+
+    val summaryTextSize =
+        if (windowSizeCondition) MaterialTheme.typography.body1.fontSize else MaterialTheme.typography.h5.fontSize
+    val summaryLabelTextSize =
+        if (windowSizeCondition) MaterialTheme.typography.h6.fontSize else MaterialTheme.typography.h4.fontSize
 
     Column(
         modifier = Modifier.padding(MaterialTheme.dimen.medium),
@@ -256,12 +302,12 @@ fun SummarySection(
                 Text(
                     text = stringResource(id = R.string.summary),
                     color = MaterialTheme.colors.primary,
-                    fontSize = MaterialTheme.typography.h6.fontSize
+                    fontSize = summaryLabelTextSize
                 )
-                FavoritesButton(onFavButtonClick, tvShowDetails, isInFavorites, context)
+                FavoritesButton(onFavButtonClick, tvShowDetails, isInFavorites, windowSize, context)
             }
             Spacer(modifier = Modifier.height(MaterialTheme.dimen.small))
-            Text(text = tvShowDetails.overview, fontSize = MaterialTheme.typography.body1.fontSize)
+            Text(text = tvShowDetails.overview, fontSize = summaryTextSize)
             Spacer(modifier = Modifier.height(MaterialTheme.dimen.medium))
         } else {
 
@@ -270,7 +316,7 @@ fun SummarySection(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
             ) {
-                FavoritesButton(onFavButtonClick, tvShowDetails, isInFavorites, context)
+                FavoritesButton(onFavButtonClick, tvShowDetails, isInFavorites, windowSize, context)
             }
         }
     }
@@ -281,12 +327,18 @@ private fun FavoritesButton(
     onFavButtonClick: (TvShowDetails) -> Unit,
     tvShowDetails: TvShowDetails,
     isInFavorites: Boolean,
+    windowSize: WindowSizeClass,
     context: Context
 ) {
     val addedTo = stringResource(id = R.string.added_to)
     val removeFrom = stringResource(id = R.string.remove_from)
 
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact
+    val paddingValue =
+        if (windowSizeCondition) MaterialTheme.dimen.smallMedium else MaterialTheme.dimen.mediumButtonSize
+
     IconButton(
+        modifier = Modifier.size(paddingValue),
         onClick = {
             onFavButtonClick(tvShowDetails)
             val text = if (!isInFavorites) addedTo else removeFrom
@@ -294,6 +346,7 @@ private fun FavoritesButton(
         },
     ) {
         Icon(
+            modifier = Modifier.size(paddingValue),
             imageVector = if (!isInFavorites) Icons.Outlined.FavoriteBorder else Icons.Default.Favorite,
             tint = MaterialTheme.colors.primary,
             contentDescription = null
@@ -303,21 +356,24 @@ private fun FavoritesButton(
 
 @Composable
 fun SeasonsSection(
-    seasons: List<ShortSeason>
+    seasons: List<ShortSeason>,
+    windowSize: WindowSizeClass
 ) {
 
-    seasons.forEach { season -> SeasonCard(season = season) }
+    seasons.forEach { season -> SeasonCard(season = season, windowSize = windowSize) }
 }
 
 @Composable
 fun SeasonCard(
+    windowSize: WindowSizeClass,
     season: ShortSeason
 ) {
 
     Card(
         modifier = Modifier
             .padding(MaterialTheme.dimen.small)
-            .wrapContentSize(),
+            .fillMaxWidth()
+            .height(MaterialTheme.dimen.imageLarge),
         shape = RoundedCornerShape(MaterialTheme.dimen.borderRounded),
         elevation = MaterialTheme.dimen.elevationNormal,
     ) {
@@ -325,7 +381,7 @@ fun SeasonCard(
             season.poster_path?.let {
                 ImageSection(imageUrl = it)
             }
-            ContentSection(season = season)
+            ContentSection(season = season, windowSize = windowSize)
         }
     }
 }
@@ -334,7 +390,16 @@ fun SeasonCard(
 private fun ContentSection(
     modifier: Modifier = Modifier,
     season: ShortSeason,
+    windowSize: WindowSizeClass,
 ) {
+
+    val sizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact ||
+            windowSize.screenHeightInfo is WindowSizeClass.WindowType.Medium
+    val titleFontSize =
+        if (sizeCondition) MaterialTheme.typography.h6.fontSize else MaterialTheme.typography.h4.fontSize
+    val overViewFontSize =
+        if (sizeCondition) MaterialTheme.typography.body1.fontSize else MaterialTheme.typography.h6.fontSize
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -347,7 +412,7 @@ private fun ContentSection(
             text = season.name,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Start,
-            fontSize = MaterialTheme.typography.h6.fontSize,
+            fontSize = titleFontSize,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -355,14 +420,15 @@ private fun ContentSection(
             modifier = modifier.fillMaxWidth(),
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colors.primary,
-            text = "${season.episode_count} ${stringResource(id = R.string.episodes)}"
+            text = "${season.episode_count} ${stringResource(id = R.string.episodes)}",
+            fontSize = overViewFontSize
         )
         Text(
             modifier = modifier.fillMaxWidth(),
             text = season.overview,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
-            fontSize = MaterialTheme.typography.body1.fontSize
+            fontSize = overViewFontSize
         )
     }
 }
@@ -375,7 +441,9 @@ private fun ImageSection(
     val context = LocalContext.current
 
     SubcomposeAsyncImage(
-        modifier = modifier.size(MaterialTheme.dimen.imageLarge),
+        modifier = modifier
+            .fillMaxHeight()
+            .width(MaterialTheme.dimen.extraExtraLarge),
         model = ImageRequest.Builder(context)
             .data(imageUrl.getImageByPath())
             .crossfade(true)

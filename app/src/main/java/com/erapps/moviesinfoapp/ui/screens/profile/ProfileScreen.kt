@@ -1,6 +1,7 @@
 package com.erapps.moviesinfoapp.ui.screens.profile
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -16,6 +17,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -24,6 +26,8 @@ import com.erapps.moviesinfoapp.data.room.entities.FavoriteTvShow
 import com.erapps.moviesinfoapp.ui.screens.home.ImageSection
 import com.erapps.moviesinfoapp.ui.screens.home.RatingSection
 import com.erapps.moviesinfoapp.ui.screens.home.TitleSection
+import com.erapps.moviesinfoapp.ui.shared.WindowSizeClass
+import com.erapps.moviesinfoapp.ui.shared.rememberWindowSize
 import com.erapps.moviesinfoapp.ui.theme.dimen
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
@@ -42,30 +46,61 @@ private fun ProfileScreen(
     onBackPressed: () -> Unit,
     favsList: List<FavoriteTvShow>?
 ) {
+    val windowSize = rememberWindowSize()
+
     Scaffold(
-        topBar = { ProfileTopBar(onBackPressed) }
+        topBar = { ProfileTopBar(windowSize, onBackPressed) }
     ) {
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),
             verticalArrangement = Arrangement.Top
         ) {
-            ProfileSection()
-            FavoriteSection(favsList ?: emptyList())
-            LogOutButtonSection()
+            item {
+                ProfileSection(windowSize)
+                FavoriteSection(windowSize, favsList ?: emptyList())
+                LogOutButtonSection(windowSize)
+            }
         }
     }
 }
 
 @Composable
-private fun ProfileTopBar(onBackPressed: () -> Unit) {
+private fun ProfileTopBar(
+    windowSize: WindowSizeClass,
+    onBackPressed: () -> Unit
+) {
+
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact
+    val fontSize =
+        if (windowSizeCondition) MaterialTheme.typography.h6.fontSize else MaterialTheme.typography.h4.fontSize
+    val appBarHeight =
+        if (windowSizeCondition) MaterialTheme.dimen.appBarNormal else MaterialTheme.dimen.appBarLarge
+    val iconButtonSize =
+        if (windowSizeCondition) MaterialTheme.dimen.large else MaterialTheme.dimen.extraLarge
+    val iconSize =
+        if (windowSizeCondition) MaterialTheme.dimen.smallMedium else MaterialTheme.dimen.mediumLarge
+
     TopAppBar(
-        title = { Text(text = stringResource(id = R.string.profile), color = Color.White) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(appBarHeight),
+        title = {
+            Text(
+                text = stringResource(id = R.string.profile),
+                color = Color.White,
+                fontSize = fontSize
+            )
+        },
         navigationIcon = {
-            IconButton(onClick = onBackPressed) {
+            IconButton(
+                modifier = Modifier.size(iconButtonSize),
+                onClick = onBackPressed
+            ) {
                 Icon(
+                    modifier = Modifier.size(iconSize),
                     imageVector = Icons.Default.ArrowBack,
                     tint = Color.White,
                     contentDescription = null
@@ -77,7 +112,11 @@ private fun ProfileTopBar(onBackPressed: () -> Unit) {
 }
 
 @Composable
-fun LogOutButtonSection() {
+fun LogOutButtonSection(windowSize: WindowSizeClass) {
+
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact
+    val fontSize =
+        if (windowSizeCondition) MaterialTheme.typography.subtitle1.fontSize else MaterialTheme.typography.h5.fontSize
 
     Spacer(modifier = Modifier.height(MaterialTheme.dimen.small))
     Row(
@@ -92,24 +131,33 @@ fun LogOutButtonSection() {
                 .size(MaterialTheme.dimen.mediumButtonSize),
             onClick = {}
         ) {
-            Text(text = stringResource(id = R.string.logout_btn_text))
+            Text(
+                text = stringResource(id = R.string.logout_btn_text),
+                fontSize = fontSize,
+                color = Color.White
+            )
         }
     }
 }
 
 @Composable
-fun FavoriteSection(favsList: List<FavoriteTvShow>) {
+fun FavoriteSection(windowSize: WindowSizeClass, favsList: List<FavoriteTvShow>) {
+
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact
+    val labelFontSize =
+        if (windowSizeCondition) MaterialTheme.typography.h6.fontSize else MaterialTheme.typography.h4.fontSize
+    val fontSize =
+        if (windowSizeCondition) MaterialTheme.typography.subtitle1.fontSize else MaterialTheme.typography.h5.fontSize
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
         Text(
             modifier = Modifier.padding(horizontal = MaterialTheme.dimen.medium),
             text = stringResource(id = R.string.my_favs_title),
-            fontSize = MaterialTheme.typography.h5.fontSize,
+            fontSize = labelFontSize,
             fontWeight = FontWeight.Bold
         )
         if (favsList.isEmpty()) {
@@ -119,7 +167,10 @@ fun FavoriteSection(favsList: List<FavoriteTvShow>) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text(text = stringResource(id = R.string.no_favs_yet))
+                Text(
+                    text = stringResource(id = R.string.no_favs_yet),
+                    fontSize = fontSize
+                )
             }
         } else {
             Spacer(modifier = Modifier.height(MaterialTheme.dimen.small))
@@ -140,8 +191,12 @@ fun FavoritesListItem(
     favoriteTvShow: FavoriteTvShow
 ) {
 
+    val windowSize = rememberWindowSize()
+
     Card(
-        modifier = modifier.padding(MaterialTheme.dimen.small),
+        modifier = modifier
+            .padding(MaterialTheme.dimen.small)
+            .size(width = MaterialTheme.dimen.imageExtraLarge, height = 244.dp),
         shape = RoundedCornerShape(MaterialTheme.dimen.borderRounded),
         elevation = MaterialTheme.dimen.elevationNormal
     ) {
@@ -151,17 +206,26 @@ fun FavoritesListItem(
             Column(
                 modifier = Modifier.padding(MaterialTheme.dimen.small)
             ) {
-                TitleSection(tvShowName = favoriteTvShow.name)
+                TitleSection(tvShowName = favoriteTvShow.name, windowSize = windowSize)
                 Spacer(modifier = Modifier.height(MaterialTheme.dimen.small))
                 RatingSection(tvShowRating = favoriteTvShow.vote_average)
-                Spacer(modifier = Modifier.height(MaterialTheme.dimen.small))
             }
         }
     }
 }
 
 @Composable
-fun ProfileSection() {
+fun ProfileSection(windowSize: WindowSizeClass) {
+
+    val windowSizeCondition = windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact
+    val iconSize =
+        if (windowSizeCondition) MaterialTheme.dimen.imageMedium else MaterialTheme.dimen.imageLarge
+    val fabSize =
+        if (windowSizeCondition) MaterialTheme.dimen.imageSmall else MaterialTheme.dimen.appBarNormal
+    val nameFontSize =
+        if (windowSizeCondition) MaterialTheme.typography.body1.fontSize else MaterialTheme.typography.h4.fontSize
+    val userNameFontSize =
+        if (windowSizeCondition) MaterialTheme.typography.body2 else MaterialTheme.typography.h6
 
     Spacer(modifier = Modifier.height(MaterialTheme.dimen.large))
     Column(
@@ -174,7 +238,7 @@ fun ProfileSection() {
         ) {
             Icon(
                 modifier = Modifier
-                    .size(MaterialTheme.dimen.imageMedium)
+                    .size(iconSize)
                     .shadow(
                         elevation = MaterialTheme.dimen.roundedMedium,
                         shape = CircleShape,
@@ -185,7 +249,7 @@ fun ProfileSection() {
                 contentDescription = null
             )
             FloatingActionButton(
-                modifier = Modifier.size(MaterialTheme.dimen.imageSmall),
+                modifier = Modifier.size(fabSize),
                 backgroundColor = MaterialTheme.colors.primary,
                 onClick = {}
             ) {
@@ -200,11 +264,11 @@ fun ProfileSection() {
         Spacer(modifier = Modifier.height(MaterialTheme.dimen.medium))
         Text(
             text = stringResource(id = R.string.john_doe_name),
-            fontSize = MaterialTheme.typography.h6.fontSize
+            fontSize = nameFontSize
         )
         Text(
             text = stringResource(id = R.string.john_doe_username),
-            style = MaterialTheme.typography.body1
+            style = userNameFontSize
         )
         Spacer(modifier = Modifier.height(MaterialTheme.dimen.medium))
     }

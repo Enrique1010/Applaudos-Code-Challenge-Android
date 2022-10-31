@@ -18,7 +18,7 @@ App to Consume [The Movie DB](https://www.themoviedb.org/documentation/api) and 
 - Be able to use the app without internet connection. ✓
 - Store the TV show list carried out locally, and offer to repeat them in case of not having an internet connection. ✓
 - Collapsible top bar on details screen. ✓
-- Save favorite TV shows on local storage (Room). ✓
+- Save favorite TV shows on local storage (Room), using profile screen to show the list of favorites TV shows, according to given figma design. ✓
 - Manage Dark and Light Themes. ✓
 - Use of at least one animation. ✓
 - Add tablet support. ✓

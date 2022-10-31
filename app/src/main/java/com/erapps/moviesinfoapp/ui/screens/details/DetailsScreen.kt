@@ -10,12 +10,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,33 +53,6 @@ fun DetailsScreen(
             insertToFavsEvent(viewModel, tvShowDetails, isInFavorites)
         }
     )
-}
-
-
-private fun insertToFavsEvent(
-    viewModel: DetailsScreenViewModel,
-    tvShowDetails: TvShowDetails,
-    isInFavorites: Boolean
-) {
-    viewModel.tvShowIsInFavorites(tvShowDetails.id)
-
-    when (isInFavorites) {
-        true -> {
-            viewModel.deleteFavoriteTvShow(tvShowDetails.id)
-        }
-        false -> {
-            viewModel.insertFavoriteTvShow(
-                FavoriteTvShow(
-                    id = tvShowDetails.id,
-                    name = tvShowDetails.name,
-                    first_air_date = tvShowDetails.first_air_date,
-                    overview = tvShowDetails.overview,
-                    vote_average = tvShowDetails.vote_average,
-                    poster_path = tvShowDetails.poster_path
-                )
-            )
-        }
-    }
 }
 
 @Composable
@@ -337,17 +307,21 @@ private fun FavoritesButton(
     val paddingValue =
         if (windowSizeCondition) MaterialTheme.dimen.smallMedium else MaterialTheme.dimen.mediumButtonSize
 
-    IconButton(
+    val (isChecked, setChecked) = remember { mutableStateOf(isInFavorites) }
+
+    IconToggleButton(
         modifier = Modifier.size(paddingValue),
-        onClick = {
+        checked = isChecked,
+        onCheckedChange = {
+            setChecked(!isChecked)
             onFavButtonClick(tvShowDetails)
-            val text = if (!isInFavorites) addedTo else removeFrom
+            val text = if (isChecked) addedTo else removeFrom
             Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
         },
     ) {
         Icon(
+            imageVector = if (isChecked) Icons.Outlined.Favorite else Icons.Default.FavoriteBorder,
             modifier = Modifier.size(paddingValue),
-            imageVector = if (!isInFavorites) Icons.Outlined.FavoriteBorder else Icons.Default.Favorite,
             tint = MaterialTheme.colors.primary,
             contentDescription = null
         )
@@ -453,4 +427,30 @@ private fun ImageSection(
         loading = { LinearProgressIndicator() },
         contentScale = ContentScale.FillWidth
     )
+}
+
+private fun insertToFavsEvent(
+    viewModel: DetailsScreenViewModel,
+    tvShowDetails: TvShowDetails,
+    isInFavorites: Boolean
+) {
+    viewModel.tvShowIsInFavorites(tvShowDetails.id)
+
+    when (isInFavorites) {
+        true -> {
+            viewModel.deleteFavoriteTvShow(tvShowDetails.id)
+        }
+        false -> {
+            viewModel.insertFavoriteTvShow(
+                FavoriteTvShow(
+                    id = tvShowDetails.id,
+                    name = tvShowDetails.name,
+                    first_air_date = tvShowDetails.first_air_date,
+                    overview = tvShowDetails.overview,
+                    vote_average = tvShowDetails.vote_average,
+                    poster_path = tvShowDetails.poster_path
+                )
+            )
+        }
+    }
 }

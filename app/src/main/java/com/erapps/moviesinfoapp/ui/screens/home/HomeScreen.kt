@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -157,12 +156,6 @@ private fun FilterChipGroup(
                         onFilterSelected(filter.filter)
                     },
                     shape = CircleShape,
-                    selectedIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null
-                        )
-                    },
                     colors = ChipDefaults.filterChipColors(
                         selectedBackgroundColor = MaterialTheme.colors.primary,
                         selectedContentColor = Color.White

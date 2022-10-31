@@ -197,12 +197,14 @@ fun AnimatedSnackBar(
             enter = slideInVertically() + expandVertically(),
             exit = slideOutVertically() + shrinkVertically()
         ) {
-            Snackbar {
+            Snackbar(
+                backgroundColor = Color.DarkGray
+            ) {
                 Text(
                     modifier = modifier.fillMaxWidth(),
                     text = snackbarData.message,
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colors.onBackground
+                    color = Color.White
                 )
             }
         }

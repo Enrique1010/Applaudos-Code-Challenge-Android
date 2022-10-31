@@ -14,7 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileScreenViewModel @Inject constructor(
     private val localDataSource: TvShowDetailsLocalDataSource
-): ViewModel() {
+) : ViewModel() {
 
     private val _favList = MutableStateFlow<List<FavoriteTvShow>?>(null)
     val favList = _favList.asStateFlow()
@@ -27,8 +27,12 @@ class ProfileScreenViewModel @Inject constructor(
 
         localDataSource.getFavsTvShows().collect { list ->
             when {
-                list.isEmpty() -> { _favList.update { emptyList() } }
-                else -> { _favList.update { list } }
+                list.isEmpty() -> {
+                    _favList.update { emptyList() }
+                }
+                else -> {
+                    _favList.update { list }
+                }
             }
         }
     }

@@ -69,6 +69,7 @@ ext{
     materialVersion = '1.7.0'
     gsonVersion = '2.10'
     pagerVersion = '0.27.0'
+    refresherVersion = '0.27.0'
     //hilt
     hiltCompiler = '1.0.0'
     // SquareUp
@@ -102,6 +103,7 @@ dependencies {
     implementation "com.google.code.gson:gson:$gsonVersion"
     implementation "com.google.accompanist:accompanist-pager:$pagerVersion"
     implementation "com.google.accompanist:accompanist-pager-indicators:$pagerVersion"
+    implementation "com.google.accompanist:accompanist-swiperefresh:$refresherVersion"
     //hilt
     implementation "com.google.dagger:hilt-android:$rootProject.hiltVersion"
     implementation 'androidx.window:window:1.0.0'

@@ -24,7 +24,7 @@ interface TvShowDetailsRepository {
 class TvShowDetailsRepositoryImp @Inject constructor(
     private val tvShowDetailsRemoteDataSource: TvShowDetailsRemoteDataSource,
     private val tvShowDetailsLocalDataSource: TvShowDetailsLocalDataSource
-): TvShowDetailsRepository {
+) : TvShowDetailsRepository {
 
     //remote
     override fun getTvShowDetails(id: Int): Flow<Result<TvShowDetails, ErrorResponse>> {

@@ -13,7 +13,7 @@ interface TvShowsRemoteDataSource {
 
 class TvShowsRemoteDataSourceImp @Inject constructor(
     private val apiService: TheMovieDBApiService
-): TvShowsRemoteDataSource {
+) : TvShowsRemoteDataSource {
 
     override suspend fun getFilteredTvShows(filter: String, page: Int) = mapResponse {
         apiService.getTrendingTvShows(filterBy = filter, page = page)

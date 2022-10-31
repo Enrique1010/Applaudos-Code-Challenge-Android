@@ -23,10 +23,10 @@ interface TvShowsRepository {
 class TvShowsRepositoryImp @Inject constructor(
     private val tvShowsRemoteDataSource: TvShowsRemoteDataSource,
     private val tvShowsLocalDataSource: TvShowsLocalDataSource
-): TvShowsRepository {
+) : TvShowsRepository {
 
     override fun getFilteredTvShows(filter: String) = Pager(
-    config = PagingConfig(
+        config = PagingConfig(
             pageSize = 30,
             enablePlaceholders = false
         ),

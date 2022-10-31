@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.erapps.moviesinfoapp.R
 import com.erapps.moviesinfoapp.ui.theme.dimen
@@ -66,7 +67,8 @@ private fun SplashScreen() {
                 text = stringResource(id = R.string.app_title),
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
-                fontSize = MaterialTheme.typography.h4.fontSize
+                fontSize = MaterialTheme.typography.h4.fontSize,
+                textAlign = TextAlign.Start
             )
         }
     }

@@ -65,7 +65,7 @@ fun DetailsScreen(
 ) {
     val lazyListState = rememberLazyListState()
     val windowSize = rememberWindowSize()
-    val firstItemVisible by remember {
+    val whenItemVisible by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex >= 1
         }
@@ -84,7 +84,7 @@ fun DetailsScreen(
             modifier = modifier,
             topBar = {
                 AnimatedVisibility(
-                    visible = firstItemVisible,
+                    visible = whenItemVisible,
                     enter = expandVertically(),
                     exit = shrinkVertically()
                 ) {
@@ -125,7 +125,7 @@ fun DetailsScreen(
                     )
                 }
             }
-            if (!firstItemVisible) {
+            if (!whenItemVisible) {
                 BackButtonBar(
                     modifier = Modifier
                         .size(paddingValue)
@@ -156,7 +156,9 @@ fun AppBar(
         if (windowSizeCondition) MaterialTheme.dimen.smallMedium else MaterialTheme.dimen.mediumLarge
 
     TopAppBar(
-        modifier = modifier.fillMaxWidth().height(appBarHeight),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(appBarHeight),
         title = {
             Text(
                 text = titleText,

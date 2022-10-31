@@ -2,7 +2,6 @@ package com.erapps.moviesinfoapp.data.api
 
 import com.erapps.moviesinfoapp.BuildConfig
 import com.erapps.moviesinfoapp.data.api.models.ErrorResponse
-import com.erapps.moviesinfoapp.data.api.models.FilterBySelection
 import com.erapps.moviesinfoapp.data.api.models.ListResponse
 import com.erapps.moviesinfoapp.data.api.models.tvshowdetails.TvShowDetails
 import retrofit2.http.GET

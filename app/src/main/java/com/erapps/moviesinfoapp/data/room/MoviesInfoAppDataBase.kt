@@ -14,7 +14,7 @@ import com.erapps.moviesinfoapp.data.room.entities.FavoriteTvShow
     exportSchema = false
 )
 @TypeConverters(Converters::class)
-abstract class MoviesInfoAppDataBase: RoomDatabase() {
+abstract class MoviesInfoAppDataBase : RoomDatabase() {
     abstract fun favsTvShowsDao(): FavsTvShowsDao
     abstract fun movieListDao(): MovieListDao
 }

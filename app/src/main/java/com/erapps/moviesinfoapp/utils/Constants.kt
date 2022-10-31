@@ -7,6 +7,7 @@ object Constants {
     const val HOME_SCREEN = "home"
     const val DETAILS_SCREEN = "details"
     const val PROFILE_SCREEN = "profile"
+
     //NAVIGATION ARGUMENT KEYS
     const val TV_SHOW_ID_ARGUMENT = "detailsId"
 }

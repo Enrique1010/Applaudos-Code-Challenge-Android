@@ -10,8 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +38,9 @@ import com.erapps.moviesinfoapp.ui.shared.*
 import com.erapps.moviesinfoapp.ui.theme.dimen
 import com.erapps.moviesinfoapp.utils.getImageByPath
 import com.google.accompanist.pager.*
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import kotlinx.coroutines.delay
 import java.math.RoundingMode
 
 @Composable
@@ -71,8 +73,10 @@ fun HomeScreen(
         onEmptyButtonClick = { viewModel.getFilteredTvShows(FilterBySelection.Popular.filter) },
         onFavsClick = onFavsClick,
         onCardClick = onCardClick,
-        onCache = { viewModel.cacheTvShows(it) }
-    ) { viewModel.getFilteredTvShows(it) }
+        onRefresh = { viewModel.getFilteredTvShows(getAllFilters()[0].filter) },
+        onCache = { viewModel.cacheTvShows(it) },
+        onFilterSelected = { viewModel.getFilteredTvShows(it) }
+    )
 }
 
 @Composable
@@ -82,6 +86,7 @@ fun HomeScreen(
     onFavsClick: () -> Unit,
     onEmptyButtonClick: () -> Unit,
     onCardClick: (Int) -> Unit,
+    onRefresh: () -> Unit,
     onCache: (TvShow) -> Unit,
     onFilterSelected: (String) -> Unit,
 ) {
@@ -90,7 +95,7 @@ fun HomeScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { AppBar(windowSize ,onFavsClick) }
+        topBar = { AppBar(windowSize, onFavsClick) }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             ListAndFilter(
@@ -99,6 +104,7 @@ fun HomeScreen(
                 windowSize,
                 onEmptyButtonClick,
                 onCardClick,
+                onRefresh,
                 onCache
             )
         }
@@ -112,6 +118,7 @@ private fun ListAndFilter(
     windowSizeClass: WindowSizeClass,
     onEmptyButtonClick: () -> Unit,
     onCardClick: (Int) -> Unit,
+    onRefresh: () -> Unit,
     onCache: (TvShow) -> Unit
 ) {
 
@@ -123,6 +130,7 @@ private fun ListAndFilter(
         HomeScreenContent(
             uiState = uiState,
             onEmptyButtonClick = onEmptyButtonClick,
+            onRefresh = onRefresh,
             onCache = onCache,
             onCardClick = onCardClick
         )
@@ -177,6 +185,7 @@ private fun HomeScreenContent(
     uiState: UiState?,
     onEmptyButtonClick: () -> Unit,
     onCardClick: (Int) -> Unit,
+    onRefresh: () -> Unit,
     onCache: (TvShow) -> Unit
 ) {
     val context = LocalContext.current
@@ -186,7 +195,7 @@ private fun HomeScreenContent(
         uiState = uiState,
         onClick = onEmptyButtonClick
     ) {
-        TvShowList(it, onCache) { id ->
+        TvShowList(it, onRefresh, onCache) { id ->
             //only can go to details if internet is available
             if (status) {
                 onCardClick(id)
@@ -204,25 +213,42 @@ private fun HomeScreenContent(
 @Composable
 private fun TvShowList(
     tvShows: LazyPagingItems<TvShow>,
+    onRefresh: () -> Unit,
     onCache: (TvShow) -> Unit,
     onCardClick: (Int) -> Unit
 ) {
 
     val windowSize = rememberWindowSize()
+    var refreshing by remember { mutableStateOf(false) }
     val amountOfGrids =
         if (
             windowSize.screenWidthInfo is WindowSizeClass.WindowType.Compact ||
             windowSize.screenHeightInfo is WindowSizeClass.WindowType.Medium
         ) 2 else 4
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(amountOfGrids),
-        verticalArrangement = Arrangement.Center,
-        horizontalArrangement = Arrangement.Center
+    LaunchedEffect(refreshing) {
+        if (refreshing) {
+            delay(2000)
+            refreshing = false
+        }
+    }
+
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(refreshing),
+        onRefresh = {
+            onRefresh()
+            refreshing = true
+        },
     ) {
-        items(tvShows.itemCount) { i ->
-            onCache(tvShows[i]!!)
-            TvShowListItem(tvShow = tvShows[i]!!, onCardClick = onCardClick)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(amountOfGrids),
+            verticalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            items(tvShows.itemCount) { i ->
+                onCache(tvShows[i]!!)
+                TvShowListItem(tvShow = tvShows[i]!!, onCardClick = onCardClick)
+            }
         }
     }
 }
@@ -348,7 +374,9 @@ private fun AppBar(windowSize: WindowSizeClass, onFavsClick: () -> Unit) {
         if (windowSizeCondition) MaterialTheme.dimen.large else MaterialTheme.dimen.extraLarge
 
     TopAppBar(
-        modifier = Modifier.fillMaxWidth().height(appBarHeight),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(appBarHeight),
         title = {
             Text(
                 text = stringResource(id = R.string.tv_shows_title),

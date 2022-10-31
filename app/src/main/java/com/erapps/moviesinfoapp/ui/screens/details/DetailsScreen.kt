@@ -317,7 +317,7 @@ private fun FavoritesButton(
         onCheckedChange = {
             setChecked(!isChecked)
             onFavButtonClick(tvShowDetails)
-            val text = if (isChecked) addedTo else removeFrom
+            val text = if (isChecked) removeFrom else addedTo
             Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
         },
     ) {

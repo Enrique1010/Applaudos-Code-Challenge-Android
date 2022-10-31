@@ -7,14 +7,14 @@ import androidx.room.Query
 import com.erapps.moviesinfoapp.data.api.models.TvShow
 
 @Dao
-interface MovieListDao {
+interface TvShowListDao {
 
     @Query("select * from tvshow")
-    suspend fun getCachedMovies(): List<TvShow>?
+    suspend fun getCachedTvShows(): List<TvShow>?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMovies(tvShow: TvShow)
+    suspend fun insertTvShow(tvShow: TvShow)
 
     @Query("delete from tvshow")
-    suspend fun clearMovies()
+    suspend fun clearTvShows()
 }

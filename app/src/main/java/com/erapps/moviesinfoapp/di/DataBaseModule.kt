@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.erapps.moviesinfoapp.data.room.MoviesInfoAppDataBase
 import com.erapps.moviesinfoapp.data.room.daos.FavsTvShowsDao
-import com.erapps.moviesinfoapp.data.room.daos.MovieListDao
+import com.erapps.moviesinfoapp.data.room.daos.TvShowListDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,8 +18,8 @@ object DataBaseModule {
 
     @Singleton
     @Provides
-    fun provideMovieListDao(moviesInfoAppDataBase: MoviesInfoAppDataBase): MovieListDao {
-        return moviesInfoAppDataBase.movieListDao()
+    fun provideMovieListDao(moviesInfoAppDataBase: MoviesInfoAppDataBase): TvShowListDao {
+        return moviesInfoAppDataBase.tvShowListDao()
     }
 
     @Singleton

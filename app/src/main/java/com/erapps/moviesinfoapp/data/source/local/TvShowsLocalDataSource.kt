@@ -1,7 +1,7 @@
 package com.erapps.moviesinfoapp.data.source.local
 
 import com.erapps.moviesinfoapp.data.api.models.TvShow
-import com.erapps.moviesinfoapp.data.room.daos.MovieListDao
+import com.erapps.moviesinfoapp.data.room.daos.TvShowListDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -16,20 +16,20 @@ interface TvShowsLocalDataSource {
 }
 
 class TvShowsLocalDataSourceImp @Inject constructor(
-    private val movieListDao: MovieListDao
+    private val tvShowListDao: TvShowListDao
 ) : TvShowsLocalDataSource {
 
     override suspend fun insertTvShows(tvShow: TvShow) =
         withContext(Dispatchers.IO) {
-            movieListDao.insertMovies(tvShow)
+            tvShowListDao.insertTvShow(tvShow)
         }
 
     override fun getCachedTvShows(): Flow<List<TvShow>?> = flow {
-        emit(movieListDao.getCachedMovies())
+        emit(tvShowListDao.getCachedTvShows())
     }.flowOn(Dispatchers.IO)
 
     override suspend fun clearCachedTvShows() = withContext(Dispatchers.IO) {
-        movieListDao.clearMovies()
+        tvShowListDao.clearTvShows()
     }
 
 }

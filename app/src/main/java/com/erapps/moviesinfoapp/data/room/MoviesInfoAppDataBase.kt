@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.erapps.moviesinfoapp.data.api.models.TvShow
 import com.erapps.moviesinfoapp.data.room.daos.FavsTvShowsDao
-import com.erapps.moviesinfoapp.data.room.daos.MovieListDao
+import com.erapps.moviesinfoapp.data.room.daos.TvShowListDao
 import com.erapps.moviesinfoapp.data.room.entities.FavoriteTvShow
 
 @Database(
@@ -16,5 +16,5 @@ import com.erapps.moviesinfoapp.data.room.entities.FavoriteTvShow
 @TypeConverters(Converters::class)
 abstract class MoviesInfoAppDataBase : RoomDatabase() {
     abstract fun favsTvShowsDao(): FavsTvShowsDao
-    abstract fun movieListDao(): MovieListDao
+    abstract fun tvShowListDao(): TvShowListDao
 }
